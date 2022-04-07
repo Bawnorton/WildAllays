@@ -23,6 +23,7 @@ public class EntityRegister {
     public static final EntityType<? extends BiomeAllay> DARK_ALLAY = register("dark_allay", DarkAllay::new);
     public static final EntityType<? extends BiomeAllay> END_ALLAY = register("end_allay", EndAllay::new);
     public static final EntityType<? extends BiomeAllay> FLOWER_ALLAY = register("flower_allay", FlowerAllay::new);
+    public static final EntityType<? extends BiomeAllay> FOREST_ALLAY = register("forest_allay", ForestAllay::new);
     public static final EntityType<? extends BiomeAllay> JUNGLE_ALLAY = register("jungle_allay", JungleAllay::new);
     public static final EntityType<? extends BiomeAllay> LUSH_ALLAY = register("lush_allay", LushAllay::new);
     public static final EntityType<? extends BiomeAllay> PLAINS_ALLAY = register("plains_allay", PlainsAllay::new);
@@ -37,6 +38,7 @@ public class EntityRegister {
         put("dark", new EntityWrapper<>(DARK_ALLAY, spawnEgg(DARK_ALLAY, 0x2E2413, 0x211A0F), Biome.DARK_FOREST));
         put("end", new EntityWrapper<>(END_ALLAY, spawnEgg(END_ALLAY, 0x371E36, 0x918593), Biome.END_HIGHLANDS));
         put("flower", new EntityWrapper<>(FLOWER_ALLAY, spawnEgg(FLOWER_ALLAY, 0xFFEC4E, 0x3DB9E7), Biome.FLOWER_FOREST));
+        put("forset", new EntityWrapper<>(FOREST_ALLAY, spawnEgg(FOREST_ALLAY, 0xFFEC4E, 0x3DB9E7), Biome.FOREST));
         put("jungle", new EntityWrapper<>(JUNGLE_ALLAY, spawnEgg(JUNGLE_ALLAY, 0x23670F, 0x8A9D1C), Biome.JUNGLE));
         put("lush", new EntityWrapper<>(LUSH_ALLAY, spawnEgg(LUSH_ALLAY, 0x789637, 0xE5812D), Biome.LUSH_CAVES));
         put("plains", new EntityWrapper<>(PLAINS_ALLAY, spawnEgg(PLAINS_ALLAY, 0x546A37, 0x78533F), Biome.PLAINS));
@@ -65,7 +67,7 @@ public class EntityRegister {
 
     public static void initSpawning() {
         for(String key: ENTITIES.keySet()) {
-            BiomeModifications.addSpawn(ENTITIES.get(key).spawnBiome.getContext(), SpawnGroup.CREATURE, PLAINS_ALLAY, 100, 4, 4);
+            BiomeModifications.addSpawn(ENTITIES.get(key).spawnBiome.getContext(), SpawnGroup.CREATURE, ENTITIES.get(key).entityType, 1000, 4, 4);
         }
     }
 

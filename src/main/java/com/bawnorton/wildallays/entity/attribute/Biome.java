@@ -2,11 +2,12 @@ package com.bawnorton.wildallays.entity.attribute;
 
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
-import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryKey;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 public enum Biome {
@@ -25,21 +26,15 @@ public enum Biome {
     WARPED_FOREST("warped_forest"),
     WOODED_BADLANDS("wooded_badlands");
 
-    private final Identifier[] identifiers;
-    private Predicate<BiomeSelectionContext> context;
+    private final List<RegistryKey<net.minecraft.world.biome.Biome>> keys;
+    private final Predicate<BiomeSelectionContext> context;
 
     Biome(String... ids) {
-        identifiers = new Identifier[ids.length];
-        for(int i = 0; i < ids.length; i++) {
-            identifiers[i] = new Identifier(ids[i]);
+        keys = new ArrayList<>(ids.length);
+        for (String id : ids) {
+            keys.add(RegistryKey.of(Registry.BIOME_KEY, new Identifier("minecraft", id)));
         }
-
-        context = BiomeSelectors.tag(TagKey.of(Registry.BIOME_KEY, identifiers[0]));
-        if(identifiers.length > 1) {
-            for(int i = 1; i < identifiers.length; i++) {
-                context = context.or(BiomeSelectors.tag(TagKey.of(Registry.BIOME_KEY, identifiers[i])));
-            }
-        }
+        context = BiomeSelectors.includeByKey(keys);
     }
 
     public Predicate<BiomeSelectionContext> getContext() {
@@ -49,7 +44,7 @@ public enum Biome {
     @Override
     public String toString() {
         return "Biome{" +
-                "identifiers=" + Arrays.toString(identifiers) +
+                "keys=" + keys +
                 '}';
     }
 }
