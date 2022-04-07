@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "wildallays",
+  "version": "${version}",
+
+  "name": "Wild Allays",
+  "description": "Mod that add's biome specific allays to the wild",
+  "authors": [
+    "Curmor"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/wildallays/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.bawnorton.wildallays.client.WildAllaysClient"
+    ],
+    "main": [
+      "com.bawnorton.wildallays.WildAllays"
+    ]
+  },
+  "mixins": [
+    "wildallays.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.19.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
