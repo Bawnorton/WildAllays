@@ -1,7 +1,7 @@
-package com.bawnorton.wildallays.entity.allays;
+package com.bawnorton.wildallays.entity.allay;
 
 import com.bawnorton.wildallays.entity.BiomeAllay;
-import com.bawnorton.wildallays.entity.attribute.Biome;
+import com.bawnorton.wildallays.entity.enums.Biome;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.world.World;

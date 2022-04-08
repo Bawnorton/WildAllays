@@ -1,4 +1,4 @@
-package com.bawnorton.wildallays.entity.attribute;
+package com.bawnorton.wildallays.entity.enums;
 
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -28,17 +28,25 @@ public enum Biome {
 
     private final List<RegistryKey<net.minecraft.world.biome.Biome>> keys;
     private final Predicate<BiomeSelectionContext> context;
+    private final List<Identifier> identifiers;
 
     Biome(String... ids) {
         keys = new ArrayList<>(ids.length);
+        identifiers = new ArrayList<>(ids.length);
         for (String id : ids) {
-            keys.add(RegistryKey.of(Registry.BIOME_KEY, new Identifier("minecraft", id)));
+            Identifier identifer = new Identifier("minecraft", id);
+            identifiers.add(identifer);
+            keys.add(RegistryKey.of(Registry.BIOME_KEY, identifer));
         }
         context = BiomeSelectors.includeByKey(keys);
     }
 
     public Predicate<BiomeSelectionContext> getContext() {
         return context;
+    }
+
+    public List<Identifier> getIdentifiers() {
+        return identifiers;
     }
 
     @Override
