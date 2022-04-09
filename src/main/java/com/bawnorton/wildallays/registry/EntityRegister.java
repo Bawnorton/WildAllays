@@ -14,7 +14,7 @@ import net.minecraft.util.registry.Registry;
 
 
 public class EntityRegister {
-    public static final EntityType<? extends BiomeAllay> BIOME_ALLAY = register("blank_allay", BiomeAllay::new);
+    public static final EntityType<? extends BiomeAllay> BIOME_ALLAY = register("biome_allay", BiomeAllay::new);
     public static final EntityType<? extends BiomeAllay> BIRCH_ALLAY = register("birch_allay", BirchAllay::new);
     public static final EntityType<? extends BiomeAllay> CRIMSON_ALLAY = register("crimson_allay", CrimsonAllay::new);
     public static final EntityType<? extends BiomeAllay> DARK_ALLAY = register("dark_allay", DarkAllay::new);
@@ -44,7 +44,7 @@ public class EntityRegister {
 
     public static void initSpawning() {
         for(Allay allay: Allay.values()) {
-            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.CREATURE, allay.type, 1000, 4, 4);
+            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.CREATURE, allay.type, 1000, 1, 1);
         }
     }
 }

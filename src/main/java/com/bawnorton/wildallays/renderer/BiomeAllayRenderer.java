@@ -16,7 +16,6 @@ public class BiomeAllayRenderer extends MobEntityRenderer<BiomeAllay, BiomeAllay
 
     @Override
     public Identifier getTexture(BiomeAllay entity) {
-        Allay allay = Allay.fromClass(entity.getClass());
-        return new Identifier(WildAllays.MODID, "textures/entity/biome_allay/%s_allay.png".formatted(allay != null ? allay.name : "biome"));
+        return new Identifier(WildAllays.MODID, "textures/entity/biome_allay/%s_allay.png".formatted(Allay.fromClass(entity.getClass()).name));
     }
 }

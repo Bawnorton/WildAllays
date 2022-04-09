@@ -5,7 +5,6 @@ import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
@@ -77,7 +76,7 @@ public class BiomeAllayModel extends EntityModel<BiomeAllay> {
         this.root.render(matrices, vertices, light, overlay);
     }
 
-    public void animateModel(AllayEntity allayEntity, float f, float g, float h) {
+    public void animateModel(BiomeAllay allayEntity, float f, float g, float h) {
         this.rightArm.pitch = 0.0F;
         this.rightArm.yaw = 0.0F;
         this.rightArm.roll = 0.3927F;
@@ -89,7 +88,7 @@ public class BiomeAllayModel extends EntityModel<BiomeAllay> {
     public void setArmAngle(Arm arm, MatrixStack matrices) {
         matrices.scale(0.7F, 0.7F, 0.7F);
         float f = 1.8F + (this.root.pivotY - 23.5F) / 11.2F;
-        matrices.translate(0.05000000074505806D, (double)f, 0.20000000298023224D);
+        matrices.translate(0.05000000074505806D, f, 0.20000000298023224D);
         matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-65.0F));
     }
 

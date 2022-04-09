@@ -5,6 +5,8 @@ import com.bawnorton.wildallays.entity.allay.*;
 import com.bawnorton.wildallays.item.BiomeAllaySpawnEgg;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.RegistryEntry;
 
 import static com.bawnorton.wildallays.registry.EntityRegister.*;
 
@@ -44,6 +46,26 @@ public enum Allay {
                 return allay;
             }
         }
-        return null;
+        return DEFAULT;
+    }
+
+    public static Allay fromBiome(Biome biome) {
+        for(Allay allay: Allay.values()) {
+            if(allay.biome == biome) {
+                return allay;
+            }
+        }
+        return DEFAULT;
+    }
+
+    public static Allay fromBiome(RegistryEntry<net.minecraft.world.biome.Biome> biome) {
+        for(Allay allay: Allay.values()) {
+            for(Identifier identifier: allay.biome.getIdentifiers()) {
+                if(biome.matchesId(identifier)) {
+                    return allay;
+                }
+            }
+        }
+        return DEFAULT;
     }
 }
