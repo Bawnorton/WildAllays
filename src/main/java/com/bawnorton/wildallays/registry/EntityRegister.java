@@ -30,7 +30,8 @@ public class EntityRegister {
     public static final EntityType<? extends BiomeAllay> WOODED_BADLANDS_ALLAY = register("wooded_badlands_allay", WoodedBadlandsAllay::new);
 
     private static <T extends BiomeAllay> EntityType<T> register(String id, EntityType.EntityFactory<T> initialiser) {
-        return Registry.register(Registry.ENTITY_TYPE, "wildallays:" + id, FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, initialiser)
+        return Registry.register(Registry.ENTITY_TYPE, "wildallays:" + id, FabricEntityTypeBuilder
+                        .create(SpawnGroup.MONSTER, initialiser)
                         .dimensions(EntityDimensions.fixed(0.6F, 0.6F))
                         .build());
     }
@@ -44,7 +45,7 @@ public class EntityRegister {
 
     public static void initSpawning() {
         for(Allay allay: Allay.values()) {
-            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.CREATURE, allay.type, 1000, 1, 1);
+            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.MONSTER, allay.type, 1000, 1, 1);
         }
     }
 }

@@ -5,6 +5,8 @@ import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Random;
+
 public class WildAllays implements ModInitializer {
 	public static final String MODID = "wildallays";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
