@@ -40,7 +40,7 @@ public class EntityRegister {
         for(Allay allay: Allay.values()) {
             FabricDefaultAttributeRegistry.register(allay.type, BiomeAllay.createAllayAttributes());
         }
-        Registry.register(Registry.ITEM, "%s:biome_allay_spawn_egg".formatted(WildAllays.MODID), Allay.egg);
+        Registry.register(Registry.ITEM, 632, "%s:biome_allay_spawn_egg".formatted(WildAllays.MODID), Allay.egg);
     }
 
     public static void initSpawning() {

@@ -1,0 +1,16 @@
+{
+  "entity.wildallays.biome_allay": "Allay",
+  "entity.wildallays.birch_allay": "Allay of the Birch Forest",
+  "entity.wildallays.crimson_allay": "Allay of the Crimson",
+  "entity.wildallays.dark_allay": "Allay of the Dark Forest",
+  "entity.wildallays.end_allay": "Allay of the End",
+  "entity.wildallays.flower_allay": "Allay of Flowers",
+  "entity.wildallays.forest_allay": "Allay of the Forest",
+  "entity.wildallays.jungle_allay": "Allay of the Jungle",
+  "entity.wildallays.lush_allay": "Allay of Lush Caves",
+  "entity.wildallays.plains_allay": "Allay of Plains",
+  "entity.wildallays.savanna_allay": "Allay of the Savanna",
+  "entity.wildallays.taiga_allay": "Allay of the Taiga",
+  "entity.wildallays.warped_allay": "Allay of the Warped",
+  "entity.wildallays.wooded_badlands_allay": "Allay of the Badlands"
+}

@@ -8,7 +8,6 @@ import com.bawnorton.wildallays.model.BiomeAllayEyeLayer;
 import com.bawnorton.wildallays.model.BiomeAllayModel;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.util.Identifier;
 
 public class BiomeAllayRenderer extends MobEntityRenderer<BiomeAllay, BiomeAllayModel> {

@@ -2,6 +2,9 @@ package com.bawnorton.wildallays;
 
 import com.bawnorton.wildallays.registry.EntityRegister;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.command.argument.NbtPathArgumentType;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.structure.Structure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -4,6 +4,9 @@
   "package": "com.bawnorton.wildallays.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "SpawnEggMixin",
+    "StructureMixin",
+    "WoodlandMansionGeneratorMixin"
   ],
   "client": [
   ],

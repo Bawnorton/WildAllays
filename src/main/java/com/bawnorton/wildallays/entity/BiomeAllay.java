@@ -1,20 +1,16 @@
 package com.bawnorton.wildallays.entity;
 
-import com.bawnorton.wildallays.WildAllays;
-import com.bawnorton.wildallays.entity.enums.Allay;
 import com.bawnorton.wildallays.entity.enums.Biome;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,12 +22,7 @@ public class BiomeAllay extends AllayEntity {
         super(entityType, world);
     }
 
-    @Override
-    public boolean canSpawn(WorldAccess world, SpawnReason spawnReason) {
-        return super.canSpawn(world, spawnReason);
-    }
-
-    private boolean checkSurface(BlockPos pos) {
+    protected boolean checkSurface(BlockPos pos) {
         while(pos.getY() < world.getTopY()) {
             BlockState state = world.getBlockState(pos);
             Material material = state.getMaterial();
@@ -74,6 +65,6 @@ public class BiomeAllay extends AllayEntity {
     @Nullable
     @Override
     public ItemStack getPickBlockStack() {
-        return new ItemStack(Allay.egg);
+        return new ItemStack(Items.ALLAY_SPAWN_EGG);
     }
 }
