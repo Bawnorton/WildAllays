@@ -1,6 +1,6 @@
 package com.bawnorton.wildallays.entity;
 
-import com.bawnorton.wildallays.entity.enums.Biome;
+import com.bawnorton.wildallays.entity.enums.AllayBiome;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.entity.EntityType;
@@ -9,14 +9,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
+import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 
 public class BiomeAllay extends AllayEntity {
 
-    protected Biome biome = Biome.NONE;
+    protected AllayBiome biome = AllayBiome.NONE;
 
     public BiomeAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
@@ -58,6 +60,10 @@ public class BiomeAllay extends AllayEntity {
                         (this.random.nextInt(21) - 10) / 100D,
                         (this.random.nextInt(21) - 10) / 100D);
             }
+        } else {
+            BlockPos currentPos = this.getBlockPos();
+            RegistryEntry<Biome> entry = this.world.getBiome(currentPos);
+            this.biome = AllayBiome.fromRegistry(entry);
         }
         super.tickMovement();
     }

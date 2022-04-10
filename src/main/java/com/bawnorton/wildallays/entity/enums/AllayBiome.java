@@ -4,13 +4,15 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.world.biome.Biome;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public enum Biome {
+public enum AllayBiome {
     NONE("none"),
     BIRCH_FOREST("birch_forest", "old_growth_birch_forest"),
     CRIMSON_FOREST("crimson_forest"),
@@ -26,11 +28,11 @@ public enum Biome {
     WARPED_FOREST("warped_forest"),
     WOODED_BADLANDS("wooded_badlands");
 
-    private final List<RegistryKey<net.minecraft.world.biome.Biome>> keys;
+    private final List<RegistryKey<Biome>> keys;
     private final Predicate<BiomeSelectionContext> context;
     private final List<Identifier> identifiers;
 
-    Biome(String... ids) {
+    AllayBiome(String... ids) {
         keys = new ArrayList<>(ids.length);
         identifiers = new ArrayList<>(ids.length);
         for (String id : ids) {
@@ -49,9 +51,20 @@ public enum Biome {
         return identifiers;
     }
 
+    public static AllayBiome fromRegistry(RegistryEntry<Biome> entry) {
+        for(AllayBiome biome: AllayBiome.values()) {
+            for(Identifier identifier: biome.identifiers) {
+                if(entry.matchesId(identifier)) {
+                    return biome;
+                }
+            }
+        }
+        return NONE;
+    }
+
     @Override
     public String toString() {
-        return "Biome{" +
+        return "AllayBiome{" +
                 "keys=" + keys +
                 '}';
     }
