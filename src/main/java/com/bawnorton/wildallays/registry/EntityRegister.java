@@ -1,7 +1,6 @@
 package com.bawnorton.wildallays.registry;
 
 import com.bawnorton.wildallays.WildAllays;
-import com.bawnorton.wildallays.entity.enums.Allay;
 import com.bawnorton.wildallays.entity.BiomeAllay;
 import com.bawnorton.wildallays.entity.allay.*;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
@@ -14,7 +13,7 @@ import net.minecraft.util.registry.Registry;
 
 
 public class EntityRegister {
-    public static final EntityType<? extends BiomeAllay> BIOME_ALLAY = register("biome_allay", BiomeAllay::new);
+    public static final EntityType<? extends BiomeAllay> LOST_ALLAY = register("lost_allay", LostAllay::new);
     public static final EntityType<? extends BiomeAllay> BIRCH_ALLAY = register("birch_allay", BirchAllay::new);
     public static final EntityType<? extends BiomeAllay> CRIMSON_ALLAY = register("crimson_allay", CrimsonAllay::new);
     public static final EntityType<? extends BiomeAllay> DARK_ALLAY = register("dark_allay", DarkAllay::new);
@@ -37,15 +36,15 @@ public class EntityRegister {
     }
 
     public static void init() {
-        for(Allay allay: Allay.values()) {
-            FabricDefaultAttributeRegistry.register(allay.type, BiomeAllay.createAllayAttributes());
+        for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
+            FabricDefaultAttributeRegistry.register(allay.entityType, BiomeAllay.createAllayAttributes());
         }
-        Registry.register(Registry.ITEM, 632, "%s:biome_allay_spawn_egg".formatted(WildAllays.MODID), Allay.egg);
+        Registry.register(Registry.ITEM, 632, "%s:biome_allay_spawn_egg".formatted(WildAllays.MODID), BiomeAllay.Type.egg);
     }
 
     public static void initSpawning() {
-        for(Allay allay: Allay.values()) {
-            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.MONSTER, allay.type, 1000, 1, 1);
+        for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
+            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.MONSTER, allay.entityType, 1000, 1, 1);
         }
     }
 }

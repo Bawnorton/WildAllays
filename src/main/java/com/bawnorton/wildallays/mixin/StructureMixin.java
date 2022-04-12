@@ -1,7 +1,6 @@
 package com.bawnorton.wildallays.mixin;
 
-import com.bawnorton.wildallays.WildAllays;
-import com.bawnorton.wildallays.entity.enums.Allay;
+import com.bawnorton.wildallays.entity.BiomeAllay;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AllayEntity;
@@ -21,9 +20,8 @@ public class StructureMixin {
         Optional<Entity> optionalEntity = EntityType.getEntityFromNbt(nbt, world);
         if(optionalEntity.isPresent()) {
             Entity entity = optionalEntity.get();
-            WildAllays.LOGGER.info(entity.getName().getString());
             if(entity instanceof AllayEntity) {
-                return Optional.ofNullable(Allay.DEFAULT.type.create(world));
+                return Optional.ofNullable(BiomeAllay.Type.LOST.entityType.create(world));
             }
         }
         return optionalEntity;

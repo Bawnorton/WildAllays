@@ -1,7 +1,7 @@
 package com.bawnorton.wildallays.client;
 
 import com.bawnorton.wildallays.WildAllays;
-import com.bawnorton.wildallays.entity.enums.Allay;
+import com.bawnorton.wildallays.entity.BiomeAllay;
 import com.bawnorton.wildallays.model.BiomeAllayModel;
 import com.bawnorton.wildallays.renderer.BiomeAllayRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -19,8 +19,8 @@ public class WildAllaysClient implements ClientModInitializer {
     }
 
     private void registerEntityRenderers() {
-        for(Allay allay: Allay.values()) {
-            EntityRendererRegistry.register(allay.type, BiomeAllayRenderer::new);
+        for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
+            EntityRendererRegistry.register(allay.entityType, BiomeAllayRenderer::new);
         }
         EntityModelLayerRegistry.registerModelLayer(MODEL_BIOME_ALLAY_LAYER, BiomeAllayModel::getTexturedModelData);
     }

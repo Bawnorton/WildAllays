@@ -1,22 +1,28 @@
 package com.bawnorton.wildallays.model;
 
 import com.bawnorton.wildallays.entity.BiomeAllay;
+import com.bawnorton.wildallays.entity.allay.LostAllay;
+import com.bawnorton.wildallays.util.Colour;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.model.ModelWithArms;
+import net.minecraft.client.render.entity.model.SinglePartEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
 
-public class BiomeAllayModel extends EntityModel<BiomeAllay> {
+public class BiomeAllayModel extends SinglePartEntityModel<BiomeAllay> implements ModelWithArms {
     private final ModelPart root;
     private final ModelPart body;
     private final ModelPart rightArm;
     private final ModelPart leftArm;
     private final ModelPart rightWing;
     private final ModelPart leftWing;
+
+    private BiomeAllay allay = null;
+
 
     public BiomeAllayModel(ModelPart root) {
         this.root = root.getChild("root");
@@ -69,14 +75,18 @@ public class BiomeAllayModel extends EntityModel<BiomeAllay> {
             this.leftArm.yaw = -0.20943952F;
             this.leftArm.roll = 0.017453292F;
         }
-
     }
 
     public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
-        this.root.render(matrices, vertices, light, overlay);
+        if(allay != null && alpha > 0.01) {
+            Colour c = allay.getColor();
+            this.root.render(matrices, vertices, light, overlay, c.r(), c.g(), c.b(), alpha);
+        }
+        else this.root.render(matrices, vertices, light, overlay);
     }
 
     public void animateModel(BiomeAllay allayEntity, float f, float g, float h) {
+        this.allay = allayEntity;
         this.rightArm.pitch = 0.0F;
         this.rightArm.yaw = 0.0F;
         this.rightArm.roll = 0.3927F;

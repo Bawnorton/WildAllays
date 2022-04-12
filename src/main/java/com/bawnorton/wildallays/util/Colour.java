@@ -1,7 +1,5 @@
 package com.bawnorton.wildallays.util;
 
-import com.bawnorton.wildallays.WildAllays;
-
 public class Colour {
     private float r, g, b, a;
     private float h, s, v;
