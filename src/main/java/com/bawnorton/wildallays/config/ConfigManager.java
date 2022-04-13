@@ -18,14 +18,18 @@ public class ConfigManager {
 
     static {
         settings = new Hashtable<>() {{
-            put("allay_spawn_weight", new IntSetting(40));
+            put("allay_features", new SettingMap(new Hashtable<>() {{
+                put("allay_spawn_weight", new IntSetting(20));
+                put("allay_spawn_during_day", new BooleanSetting(false));
+            }}));
             put("allay_appearance", new SettingMap(new Hashtable<>() {{
                 put("allay_gives_off_particles", new BooleanSetting(true));
                 put("allay_glow", new BooleanSetting(false));
                 put("lost_allay_camoflages", new BooleanSetting(true));
                 put("lost_allay_gives_off_particles", new BooleanSetting(false));
             }}));
-            put("allay_biomes", new SettingMap(new Hashtable<>() {{
+            put("allay_spawn_in_biomes", new SettingMap(new Hashtable<>() {{
+                put("bamboo_jungle", new BooleanSetting(true));
                 put("birch_forest", new BooleanSetting(true));
                 put("crimson_forest", new BooleanSetting(true));
                 put("dark_forest", new BooleanSetting(true));
@@ -34,10 +38,18 @@ public class ConfigManager {
                 put("forest", new BooleanSetting(true));
                 put("jungle", new BooleanSetting(true));
                 put("lush_caves", new BooleanSetting(true));
+                put("meadow", new BooleanSetting(true));
+                put("old_growth_birch_forest", new BooleanSetting(true));
+                put("old_growth_pine_taiga", new BooleanSetting(true));
+                put("old_growth_spruce_taiga", new BooleanSetting(true));
                 put("plains", new BooleanSetting(true));
                 put("savanna", new BooleanSetting(true));
+                put("savanna_plateau", new BooleanSetting(true));
+                put("sparse_jungle", new BooleanSetting(true));
+                put("sunflower_plains", new BooleanSetting(true));
                 put("taiga", new BooleanSetting(true));
                 put("warped_forest", new BooleanSetting(true));
+                put("windswept_savanna", new BooleanSetting(true));
                 put("wooded_badlands", new BooleanSetting(true));
             }}));
         }};
@@ -48,19 +60,23 @@ public class ConfigManager {
     }
 
     private static Setting<?> searchSettings(String key) {
-        return searchSettings(settings, key);
+        Setting<?> setting = searchSettings(settings, key);
+        if(setting == null) throw new AssertionError("\"%s\" is not a setting".formatted(key));
+        return setting;
     }
 
     private static Setting<?> searchSettings(Map<String, Setting<?>> settingMap, String key) {
-        if(settings.containsKey(key)) {
-            return settings.get(key);
+        if(settingMap.containsKey(key)) {
+            return settingMap.get(key);
         }
+        Setting<?> result = null;
         for(Setting<?> setting: settingMap.values()) {
             if(setting instanceof SettingMap map) {
-                return searchSettings(map.settings(), key);
+                result = searchSettings(map.settings(), key);
+                if(result != null) break;
             }
         }
-        throw new AssertionError();
+        return result;
     }
 
     public static <T> T get(String key, Class<T> type) {

@@ -8,6 +8,5 @@ import net.minecraft.world.World;
 public class SavannaAllay extends BiomeAllay {
     public SavannaAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
-        biome = Biome.SAVANNA;
     }
 }

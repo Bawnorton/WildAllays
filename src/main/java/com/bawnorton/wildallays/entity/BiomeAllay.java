@@ -26,17 +26,16 @@ import net.minecraft.world.WorldView;
 import net.minecraft.world.level.ColorResolver;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.bawnorton.wildallays.registry.EntityRegister.*;
 
 public abstract class BiomeAllay extends AllayEntity {
 
-    protected Biome biome;
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     protected static Hashtable<Material, ColorResolver> materialColourMap;
     protected Colour colour = new Colour();
 
@@ -73,15 +72,18 @@ public abstract class BiomeAllay extends AllayEntity {
     }
 
     protected boolean checkDarkness(BlockPos pos) {
-        return this.world.isNight() && world.getLightLevel(LightType.BLOCK, pos) < 1;
+        return ConfigManager.get("allay_spawn_during_day", Boolean.class) ||
+                this.world.isNight() && world.getLightLevel(LightType.BLOCK, pos) < 1;
+    }
+
+    protected boolean randFailure() {
+        return true;
     }
 
     @Override
     public boolean canSpawn(WorldView world) {
         BlockPos pos = this.getBlockPos();
-        boolean spawnInDark = checkDarkness(pos);
-        boolean surfaceSpawn = checkSurface(pos);
-        return spawnInDark && surfaceSpawn && super.canSpawn(world);
+        return randFailure() && checkDarkness(pos) && checkSurface(pos) && super.canSpawn(world);
     }
 
     protected void spawnParticles() {
@@ -117,50 +119,59 @@ public abstract class BiomeAllay extends AllayEntity {
     }
 
     public enum Biome {
-        NONE("none"),
-        BIRCH_FOREST("birch_forest", "old_growth_birch_forest"),
+        NONE,
+        BAMBOO_JUNGLE("bamboo_jungle"),
+        BIRCH_FOREST("birch_forest"),
         CRIMSON_FOREST("crimson_forest"),
         DARK_FOREST("dark_forest"),
         END_HIGHLANDS("end_highlands"),
         FLOWER_FOREST("flower_forest"),
         FOREST("forest"),
-        JUNGLE("jungle", "bamboo_jungle", "sparse_jungle"),
+        JUNGLE("jungle"),
         LUSH_CAVES("lush_caves"),
-        PLAINS("plains", "meadow", "sunflower_plains"),
-        SAVANNA("savanna", "savanna_plateau", "windswept_savanna"),
-        TAIGA("taiga", "old_growth_pine_taiga", "old_growth_spruce_taiga"),
+        MEADOW( "meadow"),
+        OLD_GROWTH_BIRCH_FOREST( "old_growth_birch_forest"),
+        OLD_GROWTH_PINE_TAIGA("old_growth_pine_taiga"),
+        OLD_GROWTH_SPRUCE_TAIGA("old_growth_spruce_taiga"),
+        PLAINS("plains"),
+        SAVANNA("savanna"),
+        SAVANNA_PLATEAU("savanna_plateau"),
+        SPARSE_JUNGLE( "sparse_jungle"),
+        SUNFLOWER_PLAINS("sunflower_plains"),
+        TAIGA("taiga"),
         WARPED_FOREST("warped_forest"),
+        WINDSWEPT_SAVANNA("windswept_savanna"),
         WOODED_BADLANDS("wooded_badlands");
 
-        private final List<RegistryKey<net.minecraft.world.biome.Biome>> keys;
         private final Predicate<BiomeSelectionContext> context;
-        private final List<Identifier> identifiers;
+        private final Identifier identifier;
 
-        Biome(String... ids) {
-            keys = new ArrayList<>(ids.length);
-            identifiers = new ArrayList<>(ids.length);
-            for (String id : ids) {
-                Identifier identifer = new Identifier("minecraft", id);
-                identifiers.add(identifer);
-                keys.add(RegistryKey.of(Registry.BIOME_KEY, identifer));
-            }
-            context = BiomeSelectors.includeByKey(keys);
+        public final boolean enabled;
+
+        Biome() {
+            identifier = null;
+            context = null;
+            enabled = false;
+        }
+
+        Biome(String id) {
+            identifier = new Identifier("minecraft", id);
+            context = BiomeSelectors.includeByKey(RegistryKey.of(Registry.BIOME_KEY, identifier));
+            enabled = ConfigManager.get(id, Boolean.class);
         }
 
         public Predicate<BiomeSelectionContext> getContext() {
             return context;
         }
 
-        public List<Identifier> getIdentifiers() {
-            return identifiers;
+        public static List<Biome> getEnabled() {
+            return Arrays.stream(Biome.values()).filter(biome -> biome.enabled).collect(Collectors.toList());
         }
 
         public static Biome fromRegistry(RegistryEntry<net.minecraft.world.biome.Biome> entry) {
             for(Biome biome: Biome.values()) {
-                for(Identifier identifier: biome.identifiers) {
-                    if(entry.matchesId(identifier)) {
-                        return biome;
-                    }
+                if(entry.matchesId(biome.identifier)) {
+                    return biome;
                 }
             }
             return NONE;
@@ -169,53 +180,45 @@ public abstract class BiomeAllay extends AllayEntity {
         @Override
         public String toString() {
             return "Biome{" +
-                    "keys=" + keys +
+                    "identifier=" + identifier +
+                    ", enabled=" + enabled +
                     '}';
         }
     }
 
     public enum Type {
-        LOST("lost", LostAllay.class, LOST_ALLAY, Biome.NONE),
-        BIRCH("birch", BirchAllay.class, BIRCH_ALLAY,  Biome.BIRCH_FOREST),
+        BIRCH("birch", BirchAllay.class, BIRCH_ALLAY,  Biome.BIRCH_FOREST, Biome.OLD_GROWTH_BIRCH_FOREST),
         CRIMSON("crimson", CrimsonAllay.class, CRIMSON_ALLAY,  Biome.CRIMSON_FOREST),
         DARK("dark", DarkAllay.class, DARK_ALLAY,  Biome.DARK_FOREST),
         END("end", EndAllay.class, END_ALLAY,  Biome.END_HIGHLANDS),
         FLOWER("flower", FlowerAllay.class, FLOWER_ALLAY,  Biome.FLOWER_FOREST),
         FOREST("forest", ForestAllay.class, FOREST_ALLAY,  Biome.FOREST),
-        JUNGLE("jungle", JungleAllay.class, JUNGLE_ALLAY,  Biome.JUNGLE),
+        JUNGLE("jungle", JungleAllay.class, JUNGLE_ALLAY,  Biome.JUNGLE, Biome.BAMBOO_JUNGLE, Biome.SPARSE_JUNGLE),
         LUSH("lush", LushAllay.class, LUSH_ALLAY, Biome.LUSH_CAVES),
-        PLAINS("plains", PlainsAllay.class, PLAINS_ALLAY,  Biome.PLAINS),
-        SAVANNA("savanna", SavannaAllay.class, SAVANNA_ALLAY,  Biome.SAVANNA),
-        TAIGA("taiga", TaigaAllay.class, TAIGA_ALLAY,  Biome.TAIGA),
+        LOST("lost", LostAllay.class, LOST_ALLAY, Biome.NONE),
+        PLAINS("plains", PlainsAllay.class, PLAINS_ALLAY,  Biome.PLAINS, Biome.MEADOW, Biome.SUNFLOWER_PLAINS),
+        SAVANNA("savanna", SavannaAllay.class, SAVANNA_ALLAY,  Biome.SAVANNA, Biome.SAVANNA_PLATEAU, Biome.WINDSWEPT_SAVANNA),
+        TAIGA("taiga", TaigaAllay.class, TAIGA_ALLAY,  Biome.TAIGA, Biome.OLD_GROWTH_PINE_TAIGA, Biome.OLD_GROWTH_SPRUCE_TAIGA),
         WARPED("warped", WarpedAllay.class, WARPED_ALLAY,  Biome.WARPED_FOREST),
         WOODED_BADLANDS("wooded_badlands", WoodedBadlandsAllay.class, WOODED_BADLANDS_ALLAY,  Biome.WOODED_BADLANDS);
 
         public final String name;
         public final EntityType<? extends BiomeAllay> entityType;
-        public final Biome biome;
+        public final List<Biome> biomes;
         public final Object clazz;
 
         public static final Item egg = new BiomeAllaySpawnEgg();
 
-        Type(String name, Object clazz, EntityType<? extends BiomeAllay> entityType, Biome biome) {
+        Type(String name, Object clazz, EntityType<? extends BiomeAllay> entityType, Biome... biomes) {
             this.name = name;
             this.clazz = clazz;
             this.entityType = entityType;
-            this.biome = biome;
-        }
-
-        public static Type fromClass(Object clazz) {
-            for(Type allay: Type.values()) {
-                if(allay.clazz == clazz) {
-                    return allay;
-                }
-            }
-            return LOST;
+            this.biomes = List.of(biomes);
         }
 
         public static Type fromBiome(Biome biome) {
             for(Type allay: Type.values()) {
-                if(allay.biome == biome) {
+                if(allay.biomes.contains(biome)) {
                     return allay;
                 }
             }

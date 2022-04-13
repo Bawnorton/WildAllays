@@ -1,6 +1,7 @@
 package com.bawnorton.wildallays.entity.allay;
 
 import com.bawnorton.wildallays.entity.BiomeAllay;
+import com.bawnorton.wildallays.util.Colour;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.util.math.BlockPos;
@@ -9,7 +10,11 @@ import net.minecraft.world.World;
 public class WarpedAllay extends BiomeAllay {
     public WarpedAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
-        biome = Biome.TAIGA;
+    }
+
+    @Override
+    protected void setColour() {
+        colour = new Colour(45, 157, 142);
     }
 
     @Override
@@ -20,5 +25,10 @@ public class WarpedAllay extends BiomeAllay {
     @Override
     protected boolean checkSurface(BlockPos pos) {
         return true;
+    }
+
+    @Override
+    protected boolean randFailure() {
+        return this.random.nextInt(10) == 0;
     }
 }

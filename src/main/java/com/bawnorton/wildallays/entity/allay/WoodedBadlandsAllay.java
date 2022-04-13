@@ -11,6 +11,5 @@ import net.minecraft.world.level.ColorResolver;
 public class WoodedBadlandsAllay extends BiomeAllay {
     public WoodedBadlandsAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
-        biome = Biome.WOODED_BADLANDS;
     }
 }

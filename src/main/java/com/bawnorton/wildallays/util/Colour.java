@@ -7,6 +7,10 @@ public class Colour {
         this(1, 1, 1);
     }
 
+    public Colour(int r, int g, int b) {
+        this(r / 255F, g / 255F, b / 255F);
+    }
+
     public Colour(float r, float g, float b) {
         this(r, g, b, 1);
     }

@@ -10,8 +10,6 @@ public class LushAllay extends BiomeAllay {
 
     public LushAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
-        biome = Biome.JUNGLE;
-
     }
 
     @Override

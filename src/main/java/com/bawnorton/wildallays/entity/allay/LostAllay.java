@@ -18,7 +18,6 @@ public class LostAllay extends BiomeAllay {
 
     public LostAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
-        biome = Biome.NONE;
     }
 
     @Override
@@ -63,6 +62,5 @@ public class LostAllay extends BiomeAllay {
             }
         }
         this.toColour = Colour.fromBinary(allayColour);
-        this.biome = Biome.fromRegistry(world.getBiome(currentPos));
     }
 }

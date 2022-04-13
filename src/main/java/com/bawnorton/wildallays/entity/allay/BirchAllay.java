@@ -9,6 +9,5 @@ import net.minecraft.world.World;
 public class BirchAllay extends BiomeAllay {
     public BirchAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
-        biome = Biome.BIRCH_FOREST;
     }
 }
