@@ -82,7 +82,9 @@ public class BiomeAllayModel extends SinglePartEntityModel<BiomeAllay> implement
             Colour c = allay.getColor();
             this.root.render(matrices, vertices, light, overlay, c.r(), c.g(), c.b(), alpha);
         }
-        else this.root.render(matrices, vertices, light, overlay);
+        else {
+            this.root.render(matrices, vertices, light, overlay);
+        }
     }
 
     public void animateModel(BiomeAllay allayEntity, float f, float g, float h) {

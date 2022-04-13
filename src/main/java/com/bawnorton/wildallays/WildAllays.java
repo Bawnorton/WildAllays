@@ -21,6 +21,6 @@ public class WildAllays implements ModInitializer {
 
 	static {
 		Directories.init();
-//		ConfigManager.init();
+		ConfigManager.init();
 	}
 }

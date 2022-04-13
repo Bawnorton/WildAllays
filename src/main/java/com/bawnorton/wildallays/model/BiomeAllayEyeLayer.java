@@ -2,6 +2,7 @@ package com.bawnorton.wildallays.model;
 
 import com.bawnorton.wildallays.WildAllays;
 import com.bawnorton.wildallays.entity.BiomeAllay;
+import com.bawnorton.wildallays.entity.allay.LostAllay;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;

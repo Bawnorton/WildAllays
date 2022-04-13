@@ -1,5 +1,6 @@
 package com.bawnorton.wildallays.entity;
 
+import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.allay.*;
 import com.bawnorton.wildallays.item.BiomeAllaySpawnEgg;
 import com.bawnorton.wildallays.util.Colour;
@@ -8,24 +9,20 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.client.color.world.BiomeColors;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
-import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.level.ColorResolver;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,9 +42,6 @@ public abstract class BiomeAllay extends AllayEntity {
 
     public BiomeAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
-    }
-
-    static {
         materialColourMap = new Hashtable<>(){{
             put(Material.WATER, BiomeColors.WATER_COLOR);
             put(Material.LEAVES, BiomeColors.FOLIAGE_COLOR);
@@ -85,17 +79,23 @@ public abstract class BiomeAllay extends AllayEntity {
         return super.canSpawn(world);
     }
 
+    protected void spawnParticles() {
+        if(ConfigManager.get("allayGivesOffParticles", Boolean.class)) {
+            this.world.addParticle(ParticleTypes.END_ROD,
+                    this.getParticleX(1.2D),
+                    this.getRandomBodyY(),
+                    this.getParticleZ(1.2D),
+                    (this.random.nextInt(21) - 10) / 100D,
+                    (this.random.nextInt(21) - 10) / 100D,
+                    (this.random.nextInt(21) - 10) / 100D);
+        }
+    }
+
     @Override
     public void tickMovement() {
         if(this.world.isClient) {
             if(this.random.nextInt(20) == 0) {
-                this.world.addParticle(ParticleTypes.END_ROD,
-                        this.getParticleX(1.2D),
-                        this.getRandomBodyY(),
-                        this.getParticleZ(1.2D),
-                        (this.random.nextInt(21) - 10) / 100D,
-                        (this.random.nextInt(21) - 10) / 100D,
-                        (this.random.nextInt(21) - 10) / 100D);
+                spawnParticles();
             }
         }
         super.tickMovement();

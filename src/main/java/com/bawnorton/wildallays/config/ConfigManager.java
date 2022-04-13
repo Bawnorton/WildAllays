@@ -1,136 +1,92 @@
 package com.bawnorton.wildallays.config;
 
 import com.bawnorton.wildallays.WildAllays;
+import com.bawnorton.wildallays.config.setting.BooleanSetting;
+import com.bawnorton.wildallays.config.setting.IntSetting;
+import com.bawnorton.wildallays.config.setting.Setting;
 import com.bawnorton.wildallays.util.file.Directories;
 import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.internal.LinkedTreeMap;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.GameRules;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 public class ConfigManager {
-    public static final Hashtable<String, GameRules.Key<?>> gamerules = new Hashtable<>();
+
+    private static final IntSetting ALLAY_SPAWN_WEIGHT = new IntSetting("allaySpawnWeight", 40, 0, 1000);
+    private static final BooleanSetting ALLAY_PARTICLES = new BooleanSetting("allayGivesOffParticles", true);
+    private static final BooleanSetting LOST_ALLAY_PARTICLES = new BooleanSetting("lostAllayGivesOffParticles", false);
+
+    private static final Map<String, Setting<?>> settings;
+
+    static {
+        settings = new Hashtable<>() {{
+            put(ALLAY_SPAWN_WEIGHT.name, ALLAY_SPAWN_WEIGHT);
+            put(ALLAY_PARTICLES.name, ALLAY_PARTICLES);
+            put(LOST_ALLAY_PARTICLES.name, LOST_ALLAY_PARTICLES);
+        }};
+    }
 
     public static void init() {
         loadConfig();
     }
 
-    @SuppressWarnings("unchecked")
+    public static <T> T get(String key, Class<T> type) {
+        return settings.get(key).getValue(type);
+    }
+
     private static void loadConfig() {
-        try {
+        try (Reader in = Files.newBufferedReader(Directories.configFile)) {
             Gson gson = new Gson();
-
-            Reader in = Files.newBufferedReader(Directories.configFile);
-            Map<String, LinkedTreeMap<String, String>> jsonMap = gson.fromJson(in, Map.class);
-            if (jsonMap == null) {
-                writeDefault();
-                return;
+            JsonObject json = gson.fromJson(in, JsonObject.class);
+            if(json == null) {
+                json = writeDefault();
             }
-
-            for (Map.Entry<String, LinkedTreeMap<String, String>> entry : jsonMap.entrySet()) {
+            Map<String, Boolean> loadedKeys = new Hashtable<>();
+            for(String key: settings.keySet()) {
+                loadedKeys.put(key, false);
+            }
+            for(Map.Entry<String, JsonElement> entry: json.entrySet()) {
                 String key = entry.getKey();
-                LinkedTreeMap<String, String> map = entry.getValue();
-                GameRules.Category category = GameRules.Category.valueOf(map.get("category"));
-                String type = map.get("type");
-                if ("Integer".equals(type)) {
-                    int defaultValue = Integer.parseInt(map.get("current"));
-                    int min = Integer.parseInt(map.get("min"));
-                    int max = Integer.parseInt(map.get("max"));
-                    gamerules.put(key, GameRuleRegistry.register(key, category, GameRuleFactory.createIntRule(defaultValue, min, max, (server, rule) -> {})));
+                if(loadedKeys.replace(key, true) == null) throw new AssertionError();
+                Setting<?> setting = settings.get(key);
+                if(setting == null) throw new AssertionError();
+                if(setting instanceof IntSetting intSetting) {
+                    intSetting.setValue(entry.getValue().getAsInt());
+                    settings.put(key, intSetting);
+                } else if (setting instanceof BooleanSetting booleanSetting) {
+                    booleanSetting.setValue(entry.getValue().getAsBoolean());
+                    settings.put(key, booleanSetting);
                 }
             }
-            in.close();
-        } catch (JsonIOException | NumberFormatException e) {
-            WildAllays.LOGGER.error("Malformed config file, resetting");
-            writeDefault();
-        } catch (IOException e) {
-            WildAllays.LOGGER.error("Failure during config reading, this should be unreachable\n" +
-                    Arrays.toString(e.getStackTrace()));
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void writeDefault() {
-        WildAllays.LOGGER.info("Creating Config File");
-        Gson gson = new Gson();
-
-        Map<String, GameRule<?, ?>> jsonMap = new HashMap<>();
-        jsonMap.put("allaySpawnWeight", new AllaySpawnRate(
-                GameRules.Category.SPAWNING,
-                "Integer",
-                10, 0, 1000,
-                (server, rule) -> updateConfig("allaySpawnWeight", rule.get())));
-
-        for (Map.Entry<String, GameRule<?, ?>> entry : jsonMap.entrySet()) {
-            String key = entry.getKey();
-            GameRule<?, ?> rule = entry.getValue();
-            if ("Integer".equals(rule.type())) {
-                Integer[] values = (Integer[]) rule.values();
-                gamerules.put(key, GameRuleRegistry.register(
-                        key, rule.category(),
-                        GameRuleFactory.createIntRule(
-                                values[0], values[1], values[2],
-                                (BiConsumer<MinecraftServer, GameRules.IntRule>) rule.callback()
-                        )
-                ));
+            for(String key: settings.keySet()) {
+                if(!loadedKeys.get(key)) throw new AssertionError();
             }
+        } catch (IOException ignored) {
+        } catch (AssertionError | NumberFormatException e) {
+            WildAllays.LOGGER.warn("Malformed Config File. Resetting...");
+            writeDefault();
+            loadConfig();
         }
+    }
 
+    private static JsonObject writeDefault() {
         try (Writer out = Files.newBufferedWriter(Directories.configFile)) {
-            gson.toJson(jsonMap, out);
-        } catch (IOException e) {
-            WildAllays.LOGGER.error("Failure during config writing, this should be unreachable\n" +
-                    Arrays.toString(e.getStackTrace()));
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonObject json = new JsonObject();
+            for(Map.Entry<String, Setting<?>> entry: settings.entrySet()) {
+                json.addProperty(entry.getKey(), entry.getValue().getValue().toString());
+            }
+            gson.toJson(json, out);
+            return json;
+        } catch (IOException ignored) {
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void updateConfig(String key, Object value) {
-        try {
-            Gson gson = new Gson();
-
-            Reader in = Files.newBufferedReader(Directories.configFile);
-            Map<String, LinkedTreeMap<String, String>> jsonMap = gson.fromJson(in, Map.class);
-            LinkedTreeMap<String, String> treeMap = jsonMap.get(key);
-            treeMap.replace("current", String.valueOf(value));
-            in.close();
-
-            Writer out = Files.newBufferedWriter(Directories.configFile);
-            gson.toJson(jsonMap, out);
-            out.close();
-
-        } catch (IOException e) {
-        WildAllays.LOGGER.error("Failure during config updating, this should be unreachable\n" +
-                Arrays.toString(e.getStackTrace()));
-        }
-    }
-
-    private interface GameRule<T, R> {
-        GameRules.Category category();
-
-        String type();
-
-        T[] values();
-
-        BiConsumer<MinecraftServer, R> callback();
-    }
-
-    public record AllaySpawnRate(GameRules.Category category, String type, Integer current, Integer min, Integer max,
-                                 BiConsumer<MinecraftServer, GameRules.IntRule> callback) implements GameRule<Integer, GameRules.IntRule> {
-        public Integer[] values() {
-            return new Integer[]{current, min, max};
-        }
+        throw new AssertionError();
     }
 }

@@ -1,5 +1,6 @@
 package com.bawnorton.wildallays.entity.allay;
 
+import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.BiomeAllay;
 import com.bawnorton.wildallays.util.Colour;
 import net.minecraft.block.BlockState;
@@ -27,6 +28,13 @@ public class LostAllay extends BiomeAllay {
             if(!colour.equals(toColour)) {
                 colour.adjustTo(toColour, 7);
             }
+        }
+    }
+
+    @Override
+    protected void spawnParticles() {
+        if(ConfigManager.get("lostAllayGivesOffParticles", Boolean.class)) {
+            super.spawnParticles();
         }
     }
 

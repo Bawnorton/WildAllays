@@ -1,6 +1,7 @@
 package com.bawnorton.wildallays.registry;
 
 import com.bawnorton.wildallays.WildAllays;
+import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.BiomeAllay;
 import com.bawnorton.wildallays.entity.allay.*;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
@@ -44,7 +45,7 @@ public class EntityRegister {
 
     public static void initSpawning() {
         for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
-            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.MONSTER, allay.entityType, 1000, 1, 1);
+            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.MONSTER, allay.entityType, ConfigManager.get("allaySpawnWeight", Integer.class), 1, 1);
         }
     }
 }
