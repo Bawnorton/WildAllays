@@ -1,4 +1,4 @@
-package com.bawnorton.wildallays.config.setting;
+package com.bawnorton.wildallays.util.file.json.setting;
 
 public interface Setting<E> {
     E getValue();

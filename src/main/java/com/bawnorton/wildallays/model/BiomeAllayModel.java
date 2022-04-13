@@ -1,5 +1,6 @@
 package com.bawnorton.wildallays.model;
 
+import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.BiomeAllay;
 import com.bawnorton.wildallays.entity.allay.LostAllay;
 import com.bawnorton.wildallays.util.Colour;
@@ -79,8 +80,12 @@ public class BiomeAllayModel extends SinglePartEntityModel<BiomeAllay> implement
 
     public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
         if(allay != null && alpha > 0.01) {
-            Colour c = allay.getColor();
-            this.root.render(matrices, vertices, light, overlay, c.r(), c.g(), c.b(), alpha);
+            if(allay instanceof LostAllay && !ConfigManager.get("lost_allay_camoflages", Boolean.class)) {
+                this.root.render(matrices, vertices, light, overlay);
+            } else {
+                Colour c = allay.getColor();
+                this.root.render(matrices, vertices, light, overlay, c.r(), c.g(), c.b(), alpha);
+            }
         }
         else {
             this.root.render(matrices, vertices, light, overlay);

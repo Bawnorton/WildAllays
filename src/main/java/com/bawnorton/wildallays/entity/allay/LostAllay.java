@@ -33,10 +33,13 @@ public class LostAllay extends BiomeAllay {
 
     @Override
     protected void spawnParticles() {
-        if(ConfigManager.get("lostAllayGivesOffParticles", Boolean.class)) {
+        if(ConfigManager.get("lost_allay_gives_off_particles", Boolean.class)) {
             super.spawnParticles();
         }
     }
+
+    @Override
+    protected void setColour() {}
 
     @Override
     public void tickMovement() {

@@ -45,7 +45,7 @@ public class EntityRegister {
 
     public static void initSpawning() {
         for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
-            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.MONSTER, allay.entityType, ConfigManager.get("allaySpawnWeight", Integer.class), 1, 1);
+            BiomeModifications.addSpawn(allay.biome.getContext(), SpawnGroup.MONSTER, allay.entityType, ConfigManager.get("allay_spawn_weight", Integer.class), 1, 1);
         }
     }
 }

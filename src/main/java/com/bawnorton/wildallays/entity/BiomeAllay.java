@@ -38,7 +38,7 @@ public abstract class BiomeAllay extends AllayEntity {
     protected Biome biome;
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     protected static Hashtable<Material, ColorResolver> materialColourMap;
-    protected Colour colour = null;
+    protected Colour colour = new Colour();
 
     public BiomeAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
@@ -47,6 +47,16 @@ public abstract class BiomeAllay extends AllayEntity {
             put(Material.LEAVES, BiomeColors.FOLIAGE_COLOR);
             put(Material.SOLID_ORGANIC, BiomeColors.GRASS_COLOR);
         }};
+    }
+
+    protected void setColour() {
+        colour = Colour.fromBinary(world.getColor(this.getBlockPos(), BiomeColors.GRASS_COLOR));
+    }
+
+    @Override
+    public void setPosition(double x, double y, double z) {
+        setColour();
+        super.setPosition(x, y, z);
     }
 
     protected boolean checkSurface(BlockPos pos) {
@@ -62,25 +72,20 @@ public abstract class BiomeAllay extends AllayEntity {
         return true;
     }
 
-    @Override
-    public void setPosition(double x, double y, double z) {
-        colour = Colour.fromBinary(world.getColor(this.getBlockPos(), BiomeColors.GRASS_COLOR));
-        super.setPosition(x, y, z);
+    protected boolean checkDarkness(BlockPos pos) {
+        return this.world.isNight() && world.getLightLevel(LightType.BLOCK, pos) < 1;
     }
 
     @Override
     public boolean canSpawn(WorldView world) {
-        if(world.getDimension().hasSkyLight()) {
-            BlockPos pos = this.getBlockPos();
-            boolean spawnInDark = this.world.isNight() && world.getLightLevel(LightType.BLOCK, pos) < 1;
-            boolean surfaceSpawn = checkSurface(pos);
-            return spawnInDark && surfaceSpawn && super.canSpawn(world);
-        }
-        return super.canSpawn(world);
+        BlockPos pos = this.getBlockPos();
+        boolean spawnInDark = checkDarkness(pos);
+        boolean surfaceSpawn = checkSurface(pos);
+        return spawnInDark && surfaceSpawn && super.canSpawn(world);
     }
 
     protected void spawnParticles() {
-        if(ConfigManager.get("allayGivesOffParticles", Boolean.class)) {
+        if(ConfigManager.get("allay_gives_off_particles", Boolean.class)) {
             this.world.addParticle(ParticleTypes.END_ROD,
                     this.getParticleX(1.2D),
                     this.getRandomBodyY(),
