@@ -1,6 +1,7 @@
 package com.bawnorton.wildallays;
 
 import com.bawnorton.wildallays.config.ConfigManager;
+import com.bawnorton.wildallays.registry.ItemRegister;
 import com.bawnorton.wildallays.util.file.Directories;
 import com.bawnorton.wildallays.registry.EntityRegister;
 import net.fabricmc.api.ModInitializer;
@@ -15,6 +16,7 @@ public class WildAllays implements ModInitializer {
 	public void onInitialize() {
 		EntityRegister.init();
 		EntityRegister.initSpawning();
+		ItemRegister.init();
 
 		LOGGER.info("Wild Allays Initialised");
 	}

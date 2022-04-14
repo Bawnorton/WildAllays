@@ -17,7 +17,7 @@ import net.minecraft.util.math.MathHelper;
 public class BiomeAllayRenderer extends MobEntityRenderer<BiomeAllay, BiomeAllayModel> {
     public BiomeAllayRenderer(EntityRendererFactory.Context context) {
         super(context, new BiomeAllayModel(context.getPart(WildAllaysClient.MODEL_BIOME_ALLAY_LAYER)), 0.4F);
-        this.addFeature(new HeldItemFeatureRenderer<>(this));
+        this.addFeature(new HeldItemFeatureRenderer<>(this, context.method_43338()));
         this.addFeature(new BiomeAllayEyeLayer(this));
     }
 

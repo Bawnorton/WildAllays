@@ -23,38 +23,39 @@ public class LostAllay extends BiomeAllay {
     @Override
     public void tick() {
         super.tick();
-        if(world.isClient) {
-            if(!colour.equals(toColour)) {
+        if (world.isClient) {
+            if (!colour.equals(toColour)) {
                 colour.adjustTo(toColour, 7);
             }
         }
     }
 
     @Override
-    protected void spawnParticles() {
-        if(ConfigManager.get("lost_allay_gives_off_particles", Boolean.class)) {
-            super.spawnParticles();
-        }
+    protected void setColour() {
     }
 
     @Override
-    protected void setColour() {}
+    protected void spawnParticles() {
+        if (ConfigManager.get("lost_allay_gives_off_particles", Boolean.class)) {
+            super.spawnParticles();
+        }
+    }
 
     @Override
     public void tickMovement() {
         super.tickMovement();
         BlockPos currentPos = this.getBlockPos();
         BlockState state = null;
-        while(currentPos.getY() > world.getBottomY()) {
+        while (currentPos.getY() > world.getBottomY()) {
             state = world.getBlockState(currentPos);
             Material material = state.getMaterial();
-            if(!state.isAir() && material != Material.PLANT && material != Material.REPLACEABLE_PLANT) break;
+            if (!state.isAir() && material != Material.PLANT && material != Material.REPLACEABLE_PLANT) break;
             currentPos = currentPos.down();
         }
         int allayColour = 1644825;
-        if(state != null) {
+        if (state != null) {
             ColorResolver resolver = materialColourMap.get(state.getMaterial());
-            if(resolver != null) {
+            if (resolver != null) {
                 allayColour = world.getColor(currentPos, resolver);
             } else {
                 MapColor mapColour = state.getMapColor(world, currentPos);

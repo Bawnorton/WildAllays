@@ -25,12 +25,13 @@ public class EntityRegister {
     public static final EntityType<? extends BiomeAllay> LUSH_ALLAY = register("lush_allay", LushAllay::new);
     public static final EntityType<? extends BiomeAllay> PLAINS_ALLAY = register("plains_allay", PlainsAllay::new);
     public static final EntityType<? extends BiomeAllay> SAVANNA_ALLAY = register("savanna_allay", SavannaAllay::new);
+    public static final EntityType<? extends BiomeAllay> SWAMP_ALLAY = register("swamp_allay", SwampAllay::new);
     public static final EntityType<? extends BiomeAllay> TAIGA_ALLAY = register("taiga_allay", TaigaAllay::new);
     public static final EntityType<? extends BiomeAllay> WARPED_ALLAY = register("warped_allay", WarpedAllay::new);
     public static final EntityType<? extends BiomeAllay> WOODED_BADLANDS_ALLAY = register("wooded_badlands_allay", WoodedBadlandsAllay::new);
 
     private static <T extends BiomeAllay> EntityType<T> register(String id, EntityType.EntityFactory<T> initialiser) {
-        return Registry.register(Registry.ENTITY_TYPE, "wildallays:" + id, FabricEntityTypeBuilder
+        return Registry.register(Registry.ENTITY_TYPE, "%s:%s".formatted(WildAllays.MODID, id), FabricEntityTypeBuilder
                         .create(SpawnGroup.MONSTER, initialiser)
                         .dimensions(EntityDimensions.fixed(0.6F, 0.6F))
                         .build());
@@ -40,7 +41,6 @@ public class EntityRegister {
         for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
             FabricDefaultAttributeRegistry.register(allay.entityType, BiomeAllay.createAllayAttributes());
         }
-        Registry.register(Registry.ITEM, 632, "%s:biome_allay_spawn_egg".formatted(WildAllays.MODID), BiomeAllay.Type.egg);
     }
 
     public static void initSpawning() {

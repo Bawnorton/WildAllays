@@ -39,6 +39,7 @@ public class ConfigManager {
                 put("jungle", new BooleanSetting(true));
                 put("lush_caves", new BooleanSetting(true));
                 put("meadow", new BooleanSetting(true));
+                put("mangrove_swamp", new BooleanSetting(true));
                 put("old_growth_birch_forest", new BooleanSetting(true));
                 put("old_growth_pine_taiga", new BooleanSetting(true));
                 put("old_growth_spruce_taiga", new BooleanSetting(true));
@@ -46,6 +47,7 @@ public class ConfigManager {
                 put("savanna", new BooleanSetting(true));
                 put("savanna_plateau", new BooleanSetting(true));
                 put("sparse_jungle", new BooleanSetting(true));
+                put("swamp", new BooleanSetting(true));
                 put("sunflower_plains", new BooleanSetting(true));
                 put("taiga", new BooleanSetting(true));
                 put("warped_forest", new BooleanSetting(true));

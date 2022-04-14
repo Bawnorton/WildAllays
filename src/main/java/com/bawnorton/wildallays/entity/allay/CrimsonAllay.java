@@ -18,12 +18,12 @@ public class CrimsonAllay extends BiomeAllay {
     }
 
     @Override
-    protected boolean checkDarkness(BlockPos pos) {
+    protected boolean checkSurface(BlockPos pos) {
         return true;
     }
 
     @Override
-    protected boolean checkSurface(BlockPos pos) {
+    protected boolean checkDarkness(BlockPos pos) {
         return true;
     }
 
