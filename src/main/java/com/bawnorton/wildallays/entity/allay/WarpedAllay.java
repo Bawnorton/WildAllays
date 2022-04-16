@@ -13,11 +13,6 @@ public class WarpedAllay extends BiomeAllay {
     }
 
     @Override
-    protected void setColour() {
-        colour = new Colour(45, 157, 142);
-    }
-
-    @Override
     protected boolean checkSurface(BlockPos pos) {
         return true;
     }

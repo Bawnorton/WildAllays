@@ -13,11 +13,6 @@ public class EndAllay extends BiomeAllay {
     }
 
     @Override
-    protected void setColour() {
-        colour = new Colour(92, 61, 94);
-    }
-
-    @Override
     protected boolean checkDarkness(BlockPos pos) {
         return true;
     }

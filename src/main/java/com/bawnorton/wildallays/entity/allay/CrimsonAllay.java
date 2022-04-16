@@ -13,11 +13,6 @@ public class CrimsonAllay extends BiomeAllay {
     }
 
     @Override
-    protected void setColour() {
-        colour = new Colour(187, 36, 36);
-    }
-
-    @Override
     protected boolean checkSurface(BlockPos pos) {
         return true;
     }

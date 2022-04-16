@@ -3,6 +3,7 @@ package com.bawnorton.wildallays.util;
 public class Colour {
     private float r, g, b, a;
     private float h, s, v;
+
     public Colour() {
         this(1, 1, 1);
     }
@@ -16,10 +17,10 @@ public class Colour {
     }
 
     public Colour(float r, float g, float b, float a) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
+        this.r = bound(r);
+        this.g = bound(g);
+        this.b = bound(b);
+        this.a = bound(a);
         setHSV();
     }
 

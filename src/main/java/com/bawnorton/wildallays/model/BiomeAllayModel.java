@@ -79,15 +79,14 @@ public class BiomeAllayModel extends SinglePartEntityModel<BiomeAllay> implement
     }
 
     public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
-        if(allay != null && alpha > 0.01) {
-            if(allay instanceof LostAllay && !ConfigManager.get("lost_allay_camoflages", Boolean.class)) {
+        if(allay instanceof LostAllay && alpha > 0.01) {
+            if (!ConfigManager.get("lost_allay_camoflages", Boolean.class)) {
                 this.root.render(matrices, vertices, light, overlay);
             } else {
                 Colour c = allay.getColor();
                 this.root.render(matrices, vertices, light, overlay, c.r(), c.g(), c.b(), alpha);
             }
-        }
-        else {
+        } else {
             this.root.render(matrices, vertices, light, overlay);
         }
     }

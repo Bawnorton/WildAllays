@@ -23,10 +23,14 @@ public class BiomeAllayRenderer extends MobEntityRenderer<BiomeAllay, BiomeAllay
 
     @Override
     public Identifier getTexture(BiomeAllay entity) {
-        if(entity instanceof LostAllay && !ConfigManager.get("lost_allay_camoflages", Boolean.class)) {
-            return new Identifier(WildAllays.MODID, "textures/entity/biome_allay/lost_allay.png");
+        if(entity instanceof LostAllay) {
+            if(!ConfigManager.get("lost_allay_camoflages", Boolean.class)) {
+                return new Identifier(WildAllays.MODID, "textures/entity/biome_allay/lost_allay.png");
+            } else {
+                return new Identifier(WildAllays.MODID, "textures/entity/biome_allay/lost_allay_template.png");
+            }
         }
-        return new Identifier(WildAllays.MODID, "textures/entity/biome_allay/biome_allay_template.png");
+        return new Identifier(WildAllays.MODID, "textures/entity/biome_allay/%s_allay.png".formatted(BiomeAllay.Type.fromClass(entity.getClass()).name));
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.bawnorton.wildallays.entity;
 
+import com.bawnorton.wildallays.command.CommandHandler;
 import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.allay.*;
 import com.bawnorton.wildallays.item.AllayIdentifier;
 import com.bawnorton.wildallays.item.BiomeAllaySpawnEgg;
+import com.bawnorton.wildallays.particle.ParticleHelixGenerator;
 import com.bawnorton.wildallays.util.Colour;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -20,6 +22,7 @@ import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
@@ -40,6 +43,8 @@ public abstract class BiomeAllay extends AllayEntity {
     protected static Hashtable<Material, ColorResolver> materialColourMap;
     protected Colour colour = new Colour();
 
+    private ParticleHelixGenerator generator = null;
+
     public BiomeAllay(EntityType<? extends AllayEntity> entityType, World world) {
         super(entityType, world);
         materialColourMap = new Hashtable<>() {{
@@ -47,19 +52,6 @@ public abstract class BiomeAllay extends AllayEntity {
             put(Material.LEAVES, BiomeColors.FOLIAGE_COLOR);
             put(Material.SOLID_ORGANIC, BiomeColors.GRASS_COLOR);
         }};
-    }
-
-    protected void setColour() {
-        Biome biome = Biome.fromRegistry(world.getBiome(this.getBlockPos()));
-        if (Type.fromClass(this.getClass()).biomes.contains(biome)) {
-            colour = Colour.fromBinary(world.getColor(this.getBlockPos(), BiomeColors.GRASS_COLOR));
-        }
-    }
-
-    @Override
-    public void setPosition(double x, double y, double z) {
-        setColour();
-        super.setPosition(x, y, z);
     }
 
     protected boolean checkSurface(BlockPos pos) {
@@ -96,17 +88,25 @@ public abstract class BiomeAllay extends AllayEntity {
         return new ItemStack(Items.ALLAY_SPAWN_EGG);
     }
 
+
     protected void identityParticles() {
         ClientWorld world = (ClientWorld) this.world;
         PlayerEntity closest = world.getClosestPlayer(this, 64);
         if(AllayIdentifier.heldByPlayer(closest)) {
-            world.addParticle(ParticleTypes.FLAME,
-                    this.getParticleX(1.2D),
-                    this.getRandomBodyY(),
-                    this.getParticleZ(1.2D),
-                    (this.random.nextInt(21) - 10) / 100D,
-                    (this.random.nextInt(21) - 10) / 100D,
-                    (this.random.nextInt(21) - 10) / 100D);
+            if(generator == null) generator = new ParticleHelixGenerator(world, ParticleTypes.HAPPY_VILLAGER, 1000);
+            Vec3d pos = this.getPos();
+            generator.create(
+                    CommandHandler.ParticleCommand.radius,
+                    CommandHandler.ParticleCommand.circleTop,
+                    CommandHandler.ParticleCommand.circleAmplitude,
+                    CommandHandler.ParticleCommand.helixTop,
+                    CommandHandler.ParticleCommand.helixAmplitude,
+                    CommandHandler.ParticleCommand.circleSpeed,
+                    pos.getX(), pos.getY() + (this.getHeight() / 2), pos.getZ(),
+                    CommandHandler.ParticleCommand.yAxisRot,
+                    CommandHandler.ParticleCommand.angle,
+                    CommandHandler.ParticleCommand.doubleHelix);
+            generator.increment();
         }
     }
 

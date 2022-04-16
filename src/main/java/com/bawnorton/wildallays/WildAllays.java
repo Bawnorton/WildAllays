@@ -1,5 +1,6 @@
 package com.bawnorton.wildallays;
 
+import com.bawnorton.wildallays.command.CommandHandler;
 import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.registry.ItemRegister;
 import com.bawnorton.wildallays.util.file.Directories;
@@ -17,6 +18,7 @@ public class WildAllays implements ModInitializer {
 		EntityRegister.init();
 		EntityRegister.initSpawning();
 		ItemRegister.init();
+		CommandHandler.init();
 
 		LOGGER.info("Wild Allays Initialised");
 	}
