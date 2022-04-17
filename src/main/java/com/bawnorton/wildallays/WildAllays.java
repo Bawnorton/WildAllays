@@ -18,7 +18,6 @@ public class WildAllays implements ModInitializer {
 		EntityRegister.init();
 		EntityRegister.initSpawning();
 		ItemRegister.init();
-		CommandHandler.init();
 
 		LOGGER.info("Wild Allays Initialised");
 	}

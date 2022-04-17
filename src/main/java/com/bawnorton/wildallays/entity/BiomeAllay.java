@@ -2,7 +2,6 @@ package com.bawnorton.wildallays.entity;
 
 import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.allay.*;
-import com.bawnorton.wildallays.item.BiomeAllaySpawnEgg;
 import com.bawnorton.wildallays.util.Colour;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -45,6 +44,9 @@ public abstract class BiomeAllay extends AllayEntity {
             put(Material.SOLID_ORGANIC, BiomeColors.GRASS_COLOR);
         }};
     }
+
+//    @Override
+//    protected abstract ActionResult interactMob(PlayerEntity player, Hand hand);
 
     protected boolean checkSurface(BlockPos pos) {
         while (pos.getY() < world.getTopY()) {
@@ -188,7 +190,6 @@ public abstract class BiomeAllay extends AllayEntity {
         WARPED("warped", WarpedAllay.class, WARPED_ALLAY, Biome.WARPED_FOREST),
         WOODED_BADLANDS("wooded_badlands", WoodedBadlandsAllay.class, WOODED_BADLANDS_ALLAY, Biome.WOODED_BADLANDS);
 
-        public static final Item egg = new BiomeAllaySpawnEgg();
         private static final Hashtable<Object, Type> classMap = new Hashtable<>();
 
         static {
