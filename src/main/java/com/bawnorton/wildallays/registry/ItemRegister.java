@@ -2,7 +2,6 @@ package com.bawnorton.wildallays.registry;
 
 import com.bawnorton.wildallays.WildAllays;
 import com.bawnorton.wildallays.entity.BiomeAllay;
-import com.bawnorton.wildallays.item.AllayIdentifier;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;

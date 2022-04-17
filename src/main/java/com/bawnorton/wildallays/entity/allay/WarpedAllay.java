@@ -24,6 +24,6 @@ public class WarpedAllay extends BiomeAllay {
 
     @Override
     protected boolean randFailure() {
-        return this.random.nextInt(10) == 0;
+        return this.random.nextInt(100) == 0;
     }
 }
