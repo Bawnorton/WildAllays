@@ -1,17 +1,23 @@
 package com.bawnorton.wildallays;
 
-import com.bawnorton.wildallays.command.CommandHandler;
 import com.bawnorton.wildallays.config.ConfigManager;
+import com.bawnorton.wildallays.registry.EntityRegister;
 import com.bawnorton.wildallays.registry.ItemRegister;
 import com.bawnorton.wildallays.util.file.Directories;
-import com.bawnorton.wildallays.registry.EntityRegister;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WildAllays implements ModInitializer {
 	public static final String MODID = "wildallays";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
+
+	public static final ItemGroup WILD_ALLAY_GROUP = FabricItemGroupBuilder.create(
+			new Identifier(MODID, "wild_allays_group")).icon(() -> new ItemStack(ItemRegister.ALLAY_CHARM)).build();
 
 	@Override
 	public void onInitialize() {

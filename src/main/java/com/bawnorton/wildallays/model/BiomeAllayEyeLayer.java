@@ -12,10 +12,10 @@ import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 
-public class BiomeAllayEyeLayer extends EyesFeatureRenderer<BiomeAllay, BiomeAllayModel> {
+public class BiomeAllayEyeLayer extends EyesFeatureRenderer<BiomeAllay, BiomeAllayModel<BiomeAllay>> {
     private static final RenderLayer EYES = RenderLayer.getEyes(new Identifier(WildAllays.MODID, "textures/entity/biome_allay/biome_allay_eyes.png"));
 
-    public BiomeAllayEyeLayer(FeatureRendererContext<BiomeAllay, BiomeAllayModel> featureRendererContext) {
+    public BiomeAllayEyeLayer(FeatureRendererContext<BiomeAllay, BiomeAllayModel<BiomeAllay>> featureRendererContext) {
         super(featureRendererContext);
     }
 

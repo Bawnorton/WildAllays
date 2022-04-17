@@ -11,7 +11,9 @@ import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.util.Identifier;
 
 public class WildAllaysClient implements ClientModInitializer {
-    public static final EntityModelLayer MODEL_BIOME_ALLAY_LAYER = new EntityModelLayer(new Identifier(WildAllays.MODID, "biome_allay"), "main");
+    public static final EntityModelLayer BIOME_ALLAY = new EntityModelLayer(new Identifier(WildAllays.MODID, "biome_allay"), "main");
+    public static final EntityModelLayer BIOME_ALLAY_OUTER_LAYER = new EntityModelLayer(new Identifier(WildAllays.MODID, "biome_allay"), "outer_armor");
+
 
     @Override
     public void onInitializeClient() {
@@ -22,6 +24,6 @@ public class WildAllaysClient implements ClientModInitializer {
         for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
             EntityRendererRegistry.register(allay.entityType, BiomeAllayRenderer::new);
         }
-        EntityModelLayerRegistry.registerModelLayer(MODEL_BIOME_ALLAY_LAYER, BiomeAllayModel::getTexturedModelData);
+        EntityModelLayerRegistry.registerModelLayer(BIOME_ALLAY, BiomeAllayModel::getTexturedModelData);
     }
 }

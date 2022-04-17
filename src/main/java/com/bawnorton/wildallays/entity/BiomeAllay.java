@@ -2,6 +2,7 @@ package com.bawnorton.wildallays.entity;
 
 import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.allay.*;
+import com.bawnorton.wildallays.registry.ItemRegister;
 import com.bawnorton.wildallays.util.Colour;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -9,11 +10,19 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.client.color.world.BiomeColors;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.passive.AllayEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -45,8 +54,33 @@ public abstract class BiomeAllay extends AllayEntity {
         }};
     }
 
-//    @Override
-//    protected abstract ActionResult interactMob(PlayerEntity player, Hand hand);
+    @Override
+    protected ActionResult interactMob(PlayerEntity player, Hand hand) {
+        ItemStack playerStack = player.getStackInHand(hand);
+        ItemStack allayStack = this.getStackInHand(hand);
+        ItemStack allayHead = this.getEquippedStack(EquipmentSlot.HEAD);
+        if(allayStack.isEmpty()) {
+            if(!playerStack.isEmpty() && allayHead.isEmpty() && !player.isSneaking()) {
+                if(playerStack.getItem() == Items.IRON_HELMET) {
+                    ItemStack copy = new ItemStack(ItemRegister.ALLAY_IRON_HELMET, 1);
+                    this.equipStack(EquipmentSlot.HEAD, copy);
+                    if(!player.getAbilities().creativeMode) {
+                        playerStack.decrement(1);
+                    }
+                    this.world.playSoundFromEntity(player, this, SoundEvents.ENTITY_ALLAY_ITEM_GIVEN, SoundCategory.NEUTRAL, 2.0f, 1.2f);
+                    this.getBrain().remember(MemoryModuleType.LIKED_PLAYER, player.getUuid());
+                    return ActionResult.SUCCESS;
+                }
+            } else if (playerStack.isEmpty() && !allayHead.isEmpty()) {
+                this.equipStack(EquipmentSlot.HEAD, ItemStack.EMPTY);
+                this.world.playSoundFromEntity(player, this, SoundEvents.ENTITY_ALLAY_ITEM_TAKEN, SoundCategory.NEUTRAL, 2.0f, 1.0f);
+                this.getBrain().forget(MemoryModuleType.LIKED_PLAYER);
+                player.giveItemStack(allayHead.getItem() == ItemRegister.ALLAY_IRON_HELMET ? new ItemStack(Items.IRON_HELMET, 1) : allayHead);
+                return ActionResult.SUCCESS;
+            }
+        }
+        return super.interactMob(player, hand);
+    }
 
     protected boolean checkSurface(BlockPos pos) {
         while (pos.getY() < world.getTopY()) {
