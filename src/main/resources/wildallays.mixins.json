@@ -4,6 +4,7 @@
   "package": "com.bawnorton.wildallays.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "ArmorFeatureRendererMixin",
     "EntityModelsMixin",
     "SpawnEggMixin",
     "StructureMixin",

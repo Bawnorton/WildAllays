@@ -71,7 +71,7 @@ public class BiomeAllayArmourRenderer<T extends BiomeAllay, M extends BiomeAllay
 
     private Identifier getArmorTexture(ArmorItem item, @Nullable String overlay) {
         String materialName = item.getMaterial().getName();
-        String id = "textures/models/armor/" + materialName + "_layer_" + 1 + (overlay == null ? "" : "_" + overlay) + ".png";
+        String id = "textures/models/armor/" + materialName + "_layer_1" + (overlay == null ? "" : "_" + overlay) + ".png";
         return ARMOUR_TEXTURE_CACHE.computeIfAbsent(id, Identifier::new);
     }
 }

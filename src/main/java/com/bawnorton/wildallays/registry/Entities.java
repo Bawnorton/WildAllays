@@ -13,7 +13,7 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.util.registry.Registry;
 
 
-public class EntityRegister {
+public class Entities {
     public static final EntityType<? extends BiomeAllay> LOST_ALLAY = register("lost_allay", LostAllay::new);
     public static final EntityType<? extends BiomeAllay> BIRCH_ALLAY = register("birch_allay", BirchAllay::new);
     public static final EntityType<? extends BiomeAllay> CRIMSON_ALLAY = register("crimson_allay", CrimsonAllay::new);
@@ -37,14 +37,9 @@ public class EntityRegister {
                         .build());
     }
 
-    public static void init() {
+    public static void register() {
         for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
             FabricDefaultAttributeRegistry.register(allay.entityType, BiomeAllay.createAllayAttributes());
-        }
-    }
-
-    public static void initSpawning() {
-        for(BiomeAllay.Type allay: BiomeAllay.Type.values()) {
             for(BiomeAllay.Biome biome: allay.biomes) {
                 if(biome.enabled) {
                     BiomeModifications.addSpawn(biome.getContext(), SpawnGroup.MONSTER, allay.entityType, ConfigManager.get("allay_spawn_weight", Integer.class), 1, 1);

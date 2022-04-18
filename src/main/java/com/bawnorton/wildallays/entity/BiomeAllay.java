@@ -2,7 +2,7 @@ package com.bawnorton.wildallays.entity;
 
 import com.bawnorton.wildallays.config.ConfigManager;
 import com.bawnorton.wildallays.entity.allay.*;
-import com.bawnorton.wildallays.registry.ItemRegister;
+import com.bawnorton.wildallays.registry.Items;
 import com.bawnorton.wildallays.util.Colour;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -14,12 +14,9 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -38,7 +35,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static com.bawnorton.wildallays.registry.EntityRegister.*;
+import static com.bawnorton.wildallays.registry.Entities.*;
+import static net.minecraft.item.Items.*;
 
 public abstract class BiomeAllay extends AllayEntity {
 
@@ -61,21 +59,36 @@ public abstract class BiomeAllay extends AllayEntity {
         ItemStack allayHead = this.getEquippedStack(EquipmentSlot.HEAD);
         if(allayStack.isEmpty()) {
             if(!playerStack.isEmpty() && allayHead.isEmpty() && !player.isSneaking()) {
-                if(playerStack.getItem() == Items.IRON_HELMET) {
-                    ItemStack copy = new ItemStack(ItemRegister.ALLAY_IRON_HELMET, 1);
-                    this.equipStack(EquipmentSlot.HEAD, copy);
-                    if(!player.getAbilities().creativeMode) {
-                        playerStack.decrement(1);
-                    }
-                    this.world.playSoundFromEntity(player, this, SoundEvents.ENTITY_ALLAY_ITEM_GIVEN, SoundCategory.NEUTRAL, 2.0f, 1.2f);
-                    this.getBrain().remember(MemoryModuleType.LIKED_PLAYER, player.getUuid());
-                    return ActionResult.SUCCESS;
+                ItemStack helmet;
+                if(playerStack.getItem() == IRON_HELMET) {
+                    helmet = Items.ALLAY_IRON_HELMET.fromVanillaItem(playerStack);
+                } else if (playerStack.getItem() == CHAINMAIL_HELMET) {
+                    helmet = Items.ALLAY_CHAIN_HELMET.fromVanillaItem(playerStack);
+                } else if (playerStack.getItem() == GOLDEN_HELMET) {
+                    helmet = Items.ALLAY_GOLD_HELMET.fromVanillaItem(playerStack);
+                } else {
+                    return super.interactMob(player, hand);
                 }
+                this.equipStack(EquipmentSlot.HEAD, helmet);
+                if(!player.getAbilities().creativeMode) {
+                    playerStack.decrement(1);
+                }
+                this.world.playSoundFromEntity(player, this, SoundEvents.ENTITY_ALLAY_ITEM_GIVEN, SoundCategory.NEUTRAL, 2.0f, 1.2f);
+                this.getBrain().remember(MemoryModuleType.LIKED_PLAYER, player.getUuid());
+                return ActionResult.SUCCESS;
             } else if (playerStack.isEmpty() && !allayHead.isEmpty()) {
                 this.equipStack(EquipmentSlot.HEAD, ItemStack.EMPTY);
                 this.world.playSoundFromEntity(player, this, SoundEvents.ENTITY_ALLAY_ITEM_TAKEN, SoundCategory.NEUTRAL, 2.0f, 1.0f);
                 this.getBrain().forget(MemoryModuleType.LIKED_PLAYER);
-                player.giveItemStack(allayHead.getItem() == ItemRegister.ALLAY_IRON_HELMET ? new ItemStack(Items.IRON_HELMET, 1) : allayHead);
+                ItemStack helmet = allayHead;
+                if(allayHead.getItem() == Items.ALLAY_IRON_HELMET) {
+                   helmet = Items.ALLAY_IRON_HELMET.toVanillaItem(allayHead);
+                } else if (allayHead.getItem() == Items.ALLAY_CHAIN_HELMET) {
+                    helmet = Items.ALLAY_CHAIN_HELMET.toVanillaItem(allayHead);
+                } else if (allayHead.getItem() == Items.ALLAY_GOLD_HELMET) {
+                    helmet = Items.ALLAY_GOLD_HELMET.toVanillaItem(allayHead);
+                }
+                player.giveItemStack(helmet);
                 return ActionResult.SUCCESS;
             }
         }
@@ -113,7 +126,7 @@ public abstract class BiomeAllay extends AllayEntity {
     @Nullable
     @Override
     public ItemStack getPickBlockStack() {
-        return new ItemStack(Items.ALLAY_SPAWN_EGG);
+        return new ItemStack(net.minecraft.item.Items.ALLAY_SPAWN_EGG);
     }
 
     protected void spawnParticles() {
