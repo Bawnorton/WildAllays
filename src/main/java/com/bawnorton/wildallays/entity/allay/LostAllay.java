@@ -16,7 +16,7 @@ public class LostAllay extends BiomeAllay {
 
     private Colour toColour = new Colour();
 
-    public LostAllay(EntityType<? extends AllayEntity> entityType, World world) {
+    public LostAllay(EntityType<? extends BiomeAllay> entityType, World world) {
         super(entityType, world);
     }
 

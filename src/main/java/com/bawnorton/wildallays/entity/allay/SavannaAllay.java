@@ -6,7 +6,7 @@ import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.world.World;
 
 public class SavannaAllay extends BiomeAllay {
-    public SavannaAllay(EntityType<? extends AllayEntity> entityType, World world) {
+    public SavannaAllay(EntityType<? extends BiomeAllay> entityType, World world) {
         super(entityType, world);
     }
 }

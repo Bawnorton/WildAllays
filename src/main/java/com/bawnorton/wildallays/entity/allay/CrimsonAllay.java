@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class CrimsonAllay extends BiomeAllay {
-    public CrimsonAllay(EntityType<? extends AllayEntity> entityType, World world) {
+    public CrimsonAllay(EntityType<? extends BiomeAllay> entityType, World world) {
         super(entityType, world);
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.DyeableArmorItem;
+import net.minecraft.item.DyeableItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ public class BiomeAllayArmourRenderer<T extends BiomeAllay, M extends BiomeAllay
                 matrices.scale(0.75F, 0.75F, 0.75F);
                 matrices.translate(0.0, 0.5, 0);
                 matrices.pop();
-                if(armorItem instanceof DyeableArmorItem dyeableArmor) {
+                if(armorItem instanceof DyeableItem dyeableArmor) {
                     int i = dyeableArmor.getColor(itemStack);
                     float f = (float)(i >> 16 & 255) / 255.0F;
                     float g = (float)(i >> 8 & 255) / 255.0F;

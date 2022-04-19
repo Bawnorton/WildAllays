@@ -6,7 +6,7 @@ import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.world.World;
 
 public class DarkAllay extends BiomeAllay {
-    public DarkAllay(EntityType<? extends AllayEntity> entityType, World world) {
+    public DarkAllay(EntityType<? extends BiomeAllay> entityType, World world) {
         super(entityType, world);
     }
 }

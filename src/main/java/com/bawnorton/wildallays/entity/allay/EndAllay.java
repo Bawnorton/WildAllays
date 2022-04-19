@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class EndAllay extends BiomeAllay {
-    public EndAllay(EntityType<? extends AllayEntity> entityType, World world) {
+    public EndAllay(EntityType<? extends BiomeAllay> entityType, World world) {
         super(entityType, world);
     }
 

@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 
 public class LushAllay extends BiomeAllay {
 
-    public LushAllay(EntityType<? extends AllayEntity> entityType, World world) {
+    public LushAllay(EntityType<? extends BiomeAllay> entityType, World world) {
         super(entityType, world);
     }
 

@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class WarpedAllay extends BiomeAllay {
-    public WarpedAllay(EntityType<? extends AllayEntity> entityType, World world) {
+    public WarpedAllay(EntityType<? extends BiomeAllay> entityType, World world) {
         super(entityType, world);
     }
 

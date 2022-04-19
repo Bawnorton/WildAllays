@@ -12,7 +12,7 @@ public class AllayIronMaterial implements AllayArmorMaterial {
 
     @Override
     public int getProtectionAmount(EquipmentSlot slot) {
-        return slot == EquipmentSlot.HEAD ? 2 : 0;
+        return slot == EquipmentSlot.HEAD ? 6 : 0;
     }
 
     @Override

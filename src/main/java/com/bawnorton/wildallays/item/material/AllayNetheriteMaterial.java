@@ -4,20 +4,20 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 
-public class AllayGoldMaterial implements AllayArmorMaterial {
+public class AllayNetheriteMaterial implements AllayArmorMaterial {
 
     @Override
     public int getProtectionAmount(EquipmentSlot slot) {
-        return slot == EquipmentSlot.HEAD ? 5 : 0;
+        return slot == EquipmentSlot.HEAD ? 8 : 0;
     }
 
     @Override
     public SoundEvent getEquipSound() {
-        return SoundEvents.ITEM_ARMOR_EQUIP_GOLD;
+        return SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE;
     }
 
     @Override
     public String getName() {
-        return "allay_gold";
+        return "allay_netherite";
     }
 }

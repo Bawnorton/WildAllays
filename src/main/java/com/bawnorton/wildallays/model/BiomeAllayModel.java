@@ -6,7 +6,6 @@ import com.bawnorton.wildallays.entity.allay.LostAllay;
 import com.bawnorton.wildallays.util.Colour;
 import net.minecraft.client.model.*;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.ModelWithArms;
 import net.minecraft.client.render.entity.model.SinglePartEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
@@ -92,7 +91,7 @@ public class BiomeAllayModel<T extends BiomeAllay> extends SinglePartEntityModel
                 this.head.render(matrices, vertices, light, overlay, c.r(), c.g(), c.b(), alpha);
             }
         } else {
-            this.head.render(matrices, vertices, light, overlay);
+            this.head.render(matrices, vertices, light, overlay, red, green, blue, alpha);
         }
     }
 
