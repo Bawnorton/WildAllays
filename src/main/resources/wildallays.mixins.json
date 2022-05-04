@@ -5,10 +5,11 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbstractSkeletonEntityMixin",
-    "AllayEntityMixin",
     "ArmorFeatureRendererMixin",
     "EntityModelsMixin",
+    "FollowMobTaskMixin",
     "MobEntityAccessor",
+    "RangedApproachTaskMixin",
     "SpawnEggMixin",
     "StructureMixin",
     "WoodlandMansionGeneratorMixin"

@@ -26,16 +26,11 @@ import java.util.UUID;
 public class BiomeAllayBrain {
     protected static final ImmutableList<SensorType<? extends Sensor<? super BiomeAllay>>> SENSORS;
     protected static final ImmutableList<MemoryModuleType<?>> MEMORY_MODULES;
-    /*private static final float field_38406 = 1.0F;
-    private static final float field_38407 = 1.25F;
-    private static final float field_38408 = 2.0F;
-    private static final int field_38409 = 16;
-    private static final int field_38410 = 6;
-    private static final int field_38411 = 30;
-    private static final int field_38412 = 60;
-    private static final int field_38413 = 600;*/
 
-    public BiomeAllayBrain() {
+    public static void tick(BiomeAllay allay) {
+        Brain<BiomeAllay> brain =  allay.getBrain();
+        brain.resetPossibleActivities(ImmutableList.of(Activity.IDLE, Activity.FIGHT));
+        allay.setAttacking(brain.hasMemoryModule(MemoryModuleType.ATTACK_TARGET));
     }
 
     public static Brain<?> create(BiomeAllay biomeAllay, Dynamic<?> dynamic) {
@@ -54,35 +49,34 @@ public class BiomeAllayBrain {
         brain.setTaskList(Activity.CORE, 0, ImmutableList.of(
                 new StayAboveWaterTask(0.8F),
                 new LookAroundTask(45, 90),
-                new WanderAroundTask(), new TemptationCooldownTask(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS), new TemptationCooldownTask(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS)));
+                new WanderAroundTask(),
+                new TemptationCooldownTask(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS),
+                new TemptationCooldownTask(MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS)));
     }
 
     private static void addIdleActivities(Brain<BiomeAllay> brain) {
         brain.setTaskList(Activity.IDLE, ImmutableList.of(
-                Pair.of(0, new WalkToNearestVisibleWantedItemTask<>((allay) -> true, 2.0F, true, 9)),
-                Pair.of(1, new GiveInventoryToLookTargetTask<>(BiomeAllayBrain::getLookTarget, 1.25F)),
-                Pair.of(2, new WalkTowardsLookTargetTask<>(BiomeAllayBrain::getLookTarget, 16, 1.25F)),
+                Pair.of(0, new WalkToNearestVisibleWantedItemTask<>((allay) -> true, 1.75F, true, 32)),
+                Pair.of(1, new GiveInventoryToLookTargetTask<>(BiomeAllayBrain::getLookTarget, 2.25F)),
+                Pair.of(2, new WalkTowardsLookTargetTask<>(BiomeAllayBrain::getLookTarget, 4, 16, 2.25F)),
                 Pair.of(3, new TimeLimitedTask<>(new FollowMobTask((allay) -> true, 6.0F), UniformIntProvider.create(30, 60))),
                 Pair.of(4, new RandomTask<>(ImmutableList.of(
                         Pair.of(new NoPenaltyStrollTask(1.0F), 2),
                         Pair.of(new GoTowardsLookTarget(1.0F, 3), 2),
-                        Pair.of(new WaitTask(30, 60), 1))))), ImmutableSet.of());
+                        Pair.of(new WaitTask(30, 60), 1))))));
     }
 
     private static void addFightActivities(BiomeAllay biomeAllay, Brain<BiomeAllay> brain) {
-        brain.setTaskList(Activity.FIGHT, 10, ImmutableList.of(
-                new FollowMobTask((entity) -> isTargeting(biomeAllay, entity), (float) biomeAllay.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE)),
-                new RangedApproachTask(1.2F),
-                new MeleeAttackTask(18)),
+        brain.setTaskList(Activity.FIGHT, 5, ImmutableList.of(
+                        new ForgetAttackTargetTask<>(biomeAllay::isValidTarget),
+                        new FollowMobTask((entity) -> isTargeting(biomeAllay, entity), (float) biomeAllay.getAttributeValue(EntityAttributes.GENERIC_FOLLOW_RANGE)),
+                        new RangedApproachTask(1.2F),
+                        new MeleeAttackTask(18)),
                 MemoryModuleType.ATTACK_TARGET);
     }
 
     private static boolean isTargeting(BiomeAllay biomeAllay, LivingEntity entity) {
         return biomeAllay.getBrain().getOptionalMemory(MemoryModuleType.ATTACK_TARGET).filter((entityx) -> entityx == entity).isPresent();
-    }
-
-    public static void resetIdleActivities(BiomeAllay allay) {
-        allay.getBrain().resetPossibleActivities(ImmutableList.of(Activity.IDLE));
     }
 
     public static void rememberNoteBlock(LivingEntity allay, BlockPos pos) {
@@ -102,20 +96,19 @@ public class BiomeAllayBrain {
         Brain<?> brain = allay.getBrain();
         Optional<GlobalPos> optional = brain.getOptionalMemory(MemoryModuleType.LIKED_NOTEBLOCK);
         if (optional.isPresent()) {
-            BlockPos blockPos = optional.get().getPos();
-            if (shouldGoTowardsNoteBlock(allay, brain, blockPos)) {
-                return Optional.of(new BlockPosLookTarget(blockPos.up()));
+            GlobalPos globalPos = optional.get();
+            if (shouldGoTowardsNoteBlock(allay, brain, globalPos)) {
+                return Optional.of(new BlockPosLookTarget(globalPos.getPos().up()));
             }
-
             brain.forget(MemoryModuleType.LIKED_NOTEBLOCK);
         }
-
         return getLikedLookTarget(allay);
     }
 
-    private static boolean shouldGoTowardsNoteBlock(LivingEntity allay, Brain<?> brain, BlockPos pos) {
+    private static boolean shouldGoTowardsNoteBlock(LivingEntity allay, Brain<?> brain, GlobalPos globalPos) {
         Optional<Integer> optional = brain.getOptionalMemory(MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS);
-        return allay.getWorld().getBlockState(pos).isOf(Blocks.NOTE_BLOCK) && optional.isPresent();
+        World world = allay.getWorld();
+        return world.getRegistryKey() == globalPos.getDimension() && world.getBlockState(globalPos.getPos()).isOf(Blocks.NOTE_BLOCK) && optional.isPresent();
     }
 
     private static Optional<LookTarget> getLikedLookTarget(LivingEntity allay) {
@@ -128,35 +121,19 @@ public class BiomeAllayBrain {
             Optional<UUID> optional = allay.getBrain().getOptionalMemory(MemoryModuleType.LIKED_PLAYER);
             if (optional.isPresent()) {
                 Entity entity = serverWorld.getEntity(optional.get());
-                Optional<ServerPlayerEntity> optionalServerPlayer;
                 if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
-                    optionalServerPlayer = Optional.of(serverPlayerEntity);
-                } else {
-                    optionalServerPlayer = Optional.empty();
+                    if((serverPlayerEntity.interactionManager.isSurvivalLike() || serverPlayerEntity.interactionManager.isCreative()) && serverPlayerEntity.isInRange(allay, 64.0D)) {
+                        return Optional.of(serverPlayerEntity);
+                    }
                 }
-
-                return optionalServerPlayer;
+                return Optional.empty();
             }
         }
-
         return Optional.empty();
     }
 
     static {
-        SENSORS = ImmutableList.of(
-                SensorType.NEAREST_LIVING_ENTITIES,
-                SensorType.NEAREST_PLAYERS,
-                SensorType.NEAREST_ITEMS);
-        MEMORY_MODULES = ImmutableList.of(
-                MemoryModuleType.ATTACK_TARGET,
-                MemoryModuleType.PATH,
-                MemoryModuleType.LOOK_TARGET,
-                MemoryModuleType.VISIBLE_MOBS,
-                MemoryModuleType.WALK_TARGET,
-                MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE,
-                MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM,
-                MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK,
-                MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS,
-                MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS);
+        SENSORS = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_PLAYERS, SensorType.NEAREST_ITEMS);
+        MEMORY_MODULES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.LOOK_TARGET, MemoryModuleType.VISIBLE_MOBS, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.WALK_TARGET, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.NEAREST_VISIBLE_WANTED_ITEM, MemoryModuleType.LIKED_PLAYER, MemoryModuleType.LIKED_NOTEBLOCK, MemoryModuleType.LIKED_NOTEBLOCK_COOLDOWN_TICKS, MemoryModuleType.ITEM_PICKUP_COOLDOWN_TICKS);
     }
 }

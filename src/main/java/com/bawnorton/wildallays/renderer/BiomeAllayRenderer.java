@@ -19,7 +19,7 @@ public class BiomeAllayRenderer extends MobEntityRenderer<BiomeAllay, BiomeAllay
         super(context, new BiomeAllayModel<>(context.getPart(WildAllaysClient.BIOME_ALLAY)), 0.4F);
         this.addFeature(new BiomeAllayArmourRenderer<>(this,
                 new BiomeAllayModel<>(context.getPart(WildAllaysClient.BIOME_ALLAY_OUTER_LAYER))));
-        this.addFeature(new HeldItemFeatureRenderer<>(this, context.method_43338()));
+        this.addFeature(new HeldItemFeatureRenderer<>(this, context.getHeldItemRenderer()));
         this.addFeature(new BiomeAllayEyeLayer(this));
     }
 
@@ -38,10 +38,7 @@ public class BiomeAllayRenderer extends MobEntityRenderer<BiomeAllay, BiomeAllay
     @Override
     protected int getBlockLight(BiomeAllay entity, BlockPos pos) {
         if(ConfigManager.get("allay_glow", Boolean.class)) {
-            long l = entity.getWorld().getTime() + (long) Math.abs(entity.getUuid().hashCode());
-            float f = (float) Math.abs(l % 120L - 60L);
-            float g = f / 60.0F;
-            return (int) MathHelper.lerp(g, 5.0F, 15.0F);
+            return 15;
         }
         return super.getBlockLight(entity, pos);
     }

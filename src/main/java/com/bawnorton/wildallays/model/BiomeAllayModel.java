@@ -10,7 +10,6 @@ import net.minecraft.client.render.entity.model.ModelWithArms;
 import net.minecraft.client.render.entity.model.SinglePartEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Arm;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
 
@@ -23,7 +22,6 @@ public class BiomeAllayModel<T extends BiomeAllay> extends SinglePartEntityModel
     public final ModelPart leftWing;
 
     private BiomeAllay allay = null;
-
 
     public BiomeAllayModel(ModelPart head) {
         this.head = head.getChild("root");
@@ -56,30 +54,30 @@ public class BiomeAllayModel<T extends BiomeAllay> extends SinglePartEntityModel
     }
 
     public void setAngles(BiomeAllay allayEntity, float f, float g, float h, float i, float j) {
+        this.getPart().traverse().forEach(ModelPart::resetTransform);
         float k = h * 20.0F * 0.017453292F + g;
+        float l = MathHelper.cos(k) * 3.1415927F * 0.15F;
+        float m = h - (float)allayEntity.age;
+        float n = h * 9.0F * 0.017453292F;
+        float o = Math.min(g / 0.3F, 1.0F);
+        float p = 1.0F - o;
+        float q = allayEntity.method_43397(m);
         this.rightWing.pitch = 0.43633232F;
-        this.rightWing.yaw = -0.61086524F + MathHelper.cos(k) * 3.1415927F * 0.15F;
+        this.rightWing.yaw = -0.61086524F + l;
         this.leftWing.pitch = 0.43633232F;
-        this.leftWing.yaw = 0.61086524F - MathHelper.cos(k) * 3.1415927F * 0.15F;
-        if (this.method_42730(g)) {
-            float l = h * 9.0F * 0.017453292F;
-            this.head.pivotY = 23.5F + MathHelper.cos(l) * 0.25F;
-            this.rightArm.roll = 0.43633232F - MathHelper.cos(l + 4.712389F) * 3.1415927F * 0.075F;
-            this.leftArm.roll = -0.43633232F + MathHelper.cos(l + 4.712389F) * 3.1415927F * 0.075F;
-        } else {
-            this.head.pivotY = 23.5F;
-            this.rightArm.roll = 0.43633232F;
-            this.leftArm.roll = -0.43633232F;
-        }
-
-        if (!allayEntity.getStackInHand(Hand.MAIN_HAND).isEmpty()) {
-            this.rightArm.pitch = -1.134464F;
-            this.rightArm.yaw = 0.27925268F;
-            this.rightArm.roll = -0.017453292F;
-            this.leftArm.pitch = -1.134464F;
-            this.leftArm.yaw = -0.20943952F;
-            this.leftArm.roll = 0.017453292F;
-        }
+        this.leftWing.yaw = 0.61086524F - l;
+        float r = o * 0.6981317F;
+        this.body.pitch = r;
+        float s = MathHelper.lerp(q, r, MathHelper.lerp(o, -1.0471976F, -0.7853982F));
+        this.head.pivotY += (float)Math.cos(n) * 0.25F * p;
+        this.rightArm.pitch = s;
+        this.leftArm.pitch = s;
+        float t = p * (1.0F - q);
+        float u = 0.43633232F - MathHelper.cos(n + 4.712389F) * 3.1415927F * 0.075F * t;
+        this.leftArm.roll = -u;
+        this.rightArm.roll = u;
+        this.rightArm.yaw = 0.27925268F * q;
+        this.leftArm.yaw = -0.27925268F * q;
     }
 
     public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
@@ -126,13 +124,11 @@ public class BiomeAllayModel<T extends BiomeAllay> extends SinglePartEntityModel
     }
 
     public void setArmAngle(Arm arm, MatrixStack matrices) {
+        this.head.rotate(matrices);
+        this.body.rotate(matrices);
+        matrices.translate(0.0D, -0.09375D, 0.09375D);
+        matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(this.rightArm.pitch + 0.43633232F));
         matrices.scale(0.7F, 0.7F, 0.7F);
-        float f = 1.8F + (this.head.pivotY - 23.5F) / 11.2F;
-        matrices.translate(0.05000000074505806D, f, 0.20000000298023224D);
-        matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(-65.0F));
-    }
-
-    private boolean method_42730(float f) {
-        return f == 0.0F;
+        matrices.translate(0.0625D, 0.0D, 0.0D);
     }
 }

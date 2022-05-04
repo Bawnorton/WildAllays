@@ -5,14 +5,18 @@ import com.bawnorton.wildallays.entity.ai.BiomeAllayBrain;
 import com.bawnorton.wildallays.entity.allay.*;
 import com.bawnorton.wildallays.registry.Items;
 import com.bawnorton.wildallays.util.Colour;
+import com.mojang.logging.LogUtils;
+import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Dynamic;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
 import net.minecraft.client.color.world.BiomeColors;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.brain.Brain;
+import net.minecraft.entity.ai.brain.EntityLookTarget;
 import net.minecraft.entity.ai.brain.MemoryModuleState;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.ai.brain.task.LookTargetUtil;
@@ -26,23 +30,25 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.ProjectileDamageSource;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
-import net.minecraft.entity.passive.AllayEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.server.network.DebugInfoSender;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.tag.GameEventTags;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.*;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryKey;
@@ -51,29 +57,27 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.event.EntityPositionSource;
 import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.event.PositionSource;
 import net.minecraft.world.event.listener.EntityGameEventHandler;
 import net.minecraft.world.event.listener.GameEventListener;
+import net.minecraft.world.event.listener.VibrationListener;
 import net.minecraft.world.level.ColorResolver;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import static com.bawnorton.wildallays.registry.Entities.*;
 import static net.minecraft.item.Items.*;
 
-public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwner, GameEventListener {
-//    private static final boolean field_38404 = false;
-//    private static final int field_38405 = 16;
-    private static final Vec3i field_38399 = new Vec3i(1, 1, 1);
-    private final EntityPositionSource positionSource = new EntityPositionSource(this, this.getStandingEyeHeight());
-    private final EntityGameEventHandler<BiomeAllay> gameEventHandler;
+public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwner, VibrationListener.Callback {
+    private static final Logger field_39045 = LogUtils.getLogger();
+    private static final Vec3i ITEM_PICKUP_RANGE_EXPANDER = new Vec3i(1, 1, 1);
+    private final EntityGameEventHandler<VibrationListener> gameEventHandler;
     private final SimpleInventory inventory = new SimpleInventory(1);
+    private float field_38935;
+    private float field_38936;
 
     protected static final Hashtable<Material, ColorResolver> materialColourMap;
     protected Colour colour = new Colour();
@@ -82,7 +86,9 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
         super(entityType, world);
         this.moveControl = new FlightMoveControl(this, 20, true);
         this.setCanPickUpLoot(this.canPickUpLoot());
-        this.gameEventHandler = new EntityGameEventHandler<>(this);
+        this.gameEventHandler = new EntityGameEventHandler<>(new VibrationListener(
+                        new EntityPositionSource(this, this.getStandingEyeHeight()),
+                        16, this, null, 0, 0));
     }
 
     protected boolean checkSurface(BlockPos pos) {
@@ -133,7 +139,12 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
     }
 
     public static DefaultAttributeContainer.Builder createAllayAttributes() {
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 10.0D).add(EntityAttributes.GENERIC_FLYING_SPEED, 0.6000000238418579D).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.30000001192092896D).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0D).add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48.0D);
+        return MobEntity.createMobAttributes()
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0D)
+                .add(EntityAttributes.GENERIC_FLYING_SPEED, 0.1D)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1D)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.5D)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 48.0D);
     }
 
     protected EntityNavigation createNavigation(World world) {
@@ -155,20 +166,11 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
                 this.move(MovementType.SELF, this.getVelocity());
                 this.setVelocity(this.getVelocity().multiply(0.5D));
             } else {
-                float f;
-                if (this.onGround) {
-                    f = this.world.getBlockState(new BlockPos(this.getX(), this.getY() - 1.0D, this.getZ())).getBlock().getSlipperiness() * 0.91F;
-                } else {
-                    f = 0.91F;
-                }
-
-                float g = MathHelper.magnitude(0.6F) * MathHelper.magnitude(0.91F) / MathHelper.magnitude(f);
-                this.updateVelocity(this.onGround ? 0.1F * g : 0.02F, movementInput);
+                this.updateVelocity(this.getMovementSpeed(), movementInput);
                 this.move(MovementType.SELF, this.getVelocity());
-                this.setVelocity(this.getVelocity().multiply(f));
+                this.setVelocity(this.getVelocity().multiply(0.9100000262260437D));
             }
         }
-
         this.updateLimbs(this, false);
     }
 
@@ -180,12 +182,20 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
         return false;
     }
 
+    public boolean isValidTarget(@Nullable Entity entity) {
+        if (entity instanceof LivingEntity livingEntity) {
+            return !EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(entity) || this.isTeammate(entity) || livingEntity.getType() == EntityType.ARMOR_STAND || livingEntity.getType() == EntityType.WARDEN || livingEntity.isInvulnerable() || livingEntity.isDead() || !this.world.getWorldBorder().contains(livingEntity.getBoundingBox());
+        }
+        return true;
+    }
+
     @Nullable
     public LivingEntity getTarget() {
         return this.getBrain().getOptionalMemory(MemoryModuleType.ATTACK_TARGET).orElse(null);
     }
 
     public boolean damage(DamageSource source, float amount) {
+        if (this.world.isClient) return false;
         Entity attacker = source.getAttacker();
         if (attacker instanceof PlayerEntity playerEntity) {
             Optional<UUID> optional = this.getBrain().getOptionalMemory(MemoryModuleType.LIKED_PLAYER);
@@ -193,13 +203,15 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
                 return false;
             }
         }
-        if (this.brain.getOptionalMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity livingEntity) {
-            if(!(source instanceof ProjectileDamageSource) || this.isInRange(livingEntity, 2.0D)) {
-                UpdateAttackTargetTask.updateAttackTarget(this, livingEntity);
+        boolean damaged = super.damage(source, amount);
+        if(damaged) {
+            if (this.brain.getOptionalMemory(MemoryModuleType.ATTACK_TARGET).isEmpty() && attacker instanceof LivingEntity livingEntity) {
+                if(!(source instanceof ProjectileDamageSource) || this.isInRange(livingEntity, 16.0D)) {
+                    UpdateAttackTargetTask.updateAttackTarget(this, livingEntity);
+                }
             }
         }
-
-        return super.damage(source, amount);
+        return damaged;
     }
 
     protected void playStepSound(BlockPos pos, BlockState state) {
@@ -224,13 +236,29 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
         return 0.4F;
     }
 
+    protected void attack() {
+        LivingEntity target = this.getTarget();
+        if(target != null) {
+            if(target.isDead()) {
+                this.getBrain().forget(MemoryModuleType.ATTACK_TARGET);
+                return;
+            }
+            if(canSee(target)) {
+                this.getBrain().remember(MemoryModuleType.LOOK_TARGET, new EntityLookTarget(target, true));
+                this.lookAtEntity(target, 360, 360);
+                this.tryAttack(target);
+                this.getBrain().forget(MemoryModuleType.ATTACK_TARGET);
+            }
+        }
+    }
+
     @Override
     protected void mobTick() {
         this.world.getProfiler().push("biomeAllayBrain");
         this.getBrain().tick((ServerWorld)this.world, this);
         this.world.getProfiler().pop();
         this.world.getProfiler().push("biomeAllayActivityUpdate");
-        BiomeAllayBrain.resetIdleActivities(this);
+        BiomeAllayBrain.tick(this);
         this.world.getProfiler().pop();
         super.mobTick();
     }
@@ -254,14 +282,37 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
             if (this.random.nextInt(20) == 0) {
                 spawnParticles();
             }
-        }
-        if (!this.world.isClient && this.isAlive() && this.age % 10 == 0) {
+        } else if (this.isAlive() && this.age % 10 == 0) {
             this.heal(1.0F);
+        }
+    }
+
+    public boolean tryAttack(Entity target) {
+        this.world.sendEntityStatus(this, (byte)4);
+        return super.tryAttack(target);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if(this.world.isClient) {
+            this.field_38936 = this.field_38935;
+            if (this.isHoldingItem()) {
+                this.field_38935 = MathHelper.clamp(this.field_38935 + 1.0F, 0.0F, 5.0F);
+            } else {
+                this.field_38935 = MathHelper.clamp(this.field_38935 - 1.0F, 0.0F, 5.0F);
+            }
+        } else {
+            this.gameEventHandler.getListener().tick(this.world);
         }
     }
 
     public boolean canPickUpLoot() {
         return !this.isItemPickupCoolingDown() && !this.getStackInHand(Hand.MAIN_HAND).isEmpty();
+    }
+
+    public boolean isHoldingItem() {
+        return !this.getStackInHand(Hand.MAIN_HAND).isEmpty();
     }
 
     private boolean isItemPickupCoolingDown() {
@@ -359,7 +410,7 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
     }
 
     protected Vec3i getItemPickUpRangeExpander() {
-        return field_38399;
+        return ITEM_PICKUP_RANGE_EXPANDER;
     }
 
     public boolean canGather(ItemStack stack) {
@@ -368,24 +419,7 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
     }
 
     protected void loot(ItemEntity item) {
-        ItemStack itemStack = item.getStack();
-        if (this.canGather(itemStack)) {
-            SimpleInventory simpleInventory = this.getInventory();
-            boolean bl = simpleInventory.canInsert(itemStack);
-            if (!bl) {
-                return;
-            }
-
-            this.triggerItemPickedUpByEntityCriteria(item);
-            this.sendPickup(item, itemStack.getCount());
-            ItemStack itemStack2 = simpleInventory.addStack(itemStack);
-            if (itemStack2.isEmpty()) {
-                item.discard();
-            } else {
-                itemStack.setCount(itemStack2.getCount());
-            }
-        }
-
+        InventoryOwner.pickUpItem(this, this, item);
     }
 
     protected void sendAiDebugData() {
@@ -397,29 +431,81 @@ public abstract class BiomeAllay extends PathAwareEntity implements InventoryOwn
         return !this.isOnGround();
     }
 
-    public PositionSource getPositionSource() {
-        return this.positionSource;
-    }
-
-    public int getRange() {
-        return 16;
-    }
-
-    public void updateEventHandler(BiConsumer<EntityGameEventHandler<?>, ServerWorld> biConsumer) {
+    public void updateEventHandler(BiConsumer<EntityGameEventHandler<?>, ServerWorld> callback) {
         World var3 = this.world;
         if (var3 instanceof ServerWorld serverWorld) {
-            biConsumer.accept(this.gameEventHandler, serverWorld);
+            callback.accept(this.gameEventHandler, serverWorld);
+        }
+    }
+
+    public boolean method_43395() {
+        return this.limbDistance > 0.3F;
+    }
+
+    public float method_43397(float f) {
+        return MathHelper.lerp(f, this.field_38936, this.field_38935) / 5.0F;
+    }
+
+    protected void dropInventory() {
+        super.dropInventory();
+        this.inventory.clearToList().forEach(this::dropStack);
+        ItemStack itemStack = this.getEquippedStack(EquipmentSlot.MAINHAND);
+        if (!itemStack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(itemStack)) {
+            this.dropStack(itemStack);
+            this.equipStack(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
+        }
+    }
+
+    public boolean canImmediatelyDespawn(double distanceSquared) {
+        return false;
+    }
+
+    public boolean accepts(ServerWorld world, GameEventListener listener, BlockPos pos, GameEvent event, GameEvent.Emitter emitter) {
+        if (this.world == world && !this.isRemoved() && !this.isAiDisabled()) {
+            if (!this.brain.hasMemoryModule(MemoryModuleType.LIKED_NOTEBLOCK)) {
+                return true;
+            } else {
+                Optional<GlobalPos> optional = this.brain.getOptionalMemory(MemoryModuleType.LIKED_NOTEBLOCK);
+                return optional.isPresent() && optional.get().getDimension() == world.getRegistryKey() && optional.get().getPos().equals(pos);
+            }
+        } else {
+            return false;
+        }
+    }
+
+    public void accept(ServerWorld world, GameEventListener listener, BlockPos pos, GameEvent event, @Nullable Entity entity, @Nullable Entity sourceEntity, int delay) {
+        if (event == GameEvent.NOTE_BLOCK_PLAY) {
+            BiomeAllayBrain.rememberNoteBlock(this, new BlockPos(pos));
         }
 
     }
 
-    public boolean listen(ServerWorld world, GameEvent event, GameEvent.class_7397 arg, Vec3d pos) {
-        if (event != GameEvent.NOTE_BLOCK_PLAY) {
-            return false;
-        } else {
-            BiomeAllayBrain.rememberNoteBlock(this, new BlockPos(pos));
-            return true;
+    public TagKey<GameEvent> getTag() {
+        return GameEventTags.ALLAY_CAN_LISTEN;
+    }
+
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+        nbt.put("Inventory", this.inventory.toNbtList());
+        DataResult<NbtElement> var10000 = VibrationListener.createCodec(this).encodeStart(NbtOps.INSTANCE, this.gameEventHandler.getListener());
+        Logger var10001 = field_39045;
+        Objects.requireNonNull(var10001);
+        var10000.resultOrPartial(var10001::error).ifPresent((nbtElement) -> nbt.put("listener", nbtElement));
+    }
+
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        super.readCustomDataFromNbt(nbt);
+        this.inventory.readNbtList(nbt.getList("Inventory", 10));
+        if (nbt.contains("listener", 10)) {
+            DataResult<VibrationListener> var10000 = VibrationListener.createCodec(this).parse(new Dynamic<>(NbtOps.INSTANCE, nbt.getCompound("listener")));
+            Logger var10001 = field_39045;
+            Objects.requireNonNull(var10001);
+            var10000.resultOrPartial(var10001::error).ifPresent((vibrationListener) -> this.gameEventHandler.setListener(vibrationListener, this.world));
         }
+    }
+
+    protected boolean method_43689() {
+        return false;
     }
 
     static {
